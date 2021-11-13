@@ -224,7 +224,11 @@ void breakRun(StyleItem run) {
 	long hHeap = OS.GetProcessHeap();
 	run.psla = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, SCRIPT_LOGATTR.sizeof * chars.length);
 	if (run.psla == 0) SWT.error(SWT.ERROR_NO_HANDLES);
-	OS.ScriptBreak(chars, chars.length, run.analysis, run.psla);
+	int hr = OS.ScriptBreak(chars, chars.length, run.analysis, run.psla);
+	if (hr != OS.S_OK) {
+		SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null,
+				String.format(": ScriptBreak failed with return code 0x%08x for chars of len %d", hr, chars.length));
+	}
 }
 
 void checkLayout () {
@@ -287,7 +291,16 @@ void computeRuns (GC gc) {
 			if (run.style != null && run.style.metrics != null) {
 				piDx[0] = run.width;
 			} else {
-				OS.ScriptGetLogicalWidths(run.analysis, run.length, run.glyphCount, run.advances, run.clusters, run.visAttrs, piDx);
+				int hr = OS.ScriptGetLogicalWidths(run.analysis, run.length, run.glyphCount, run.advances, run.clusters, run.visAttrs, piDx);
+				if (hr != OS.S_OK) {
+					// As of Oct 2021 unreachable as ScriptGetLogicalWidths is documented as
+					// returning only S_OK
+					// https://docs.microsoft.com/en-us/windows/win32/api/usp10/nf-usp10-scriptgetlogicalwidths
+					SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null,
+							String.format(
+									": ScriptGetLogicalWidths failed with return code 0x%08x for glyphs of len %d", hr,
+									run.glyphCount));
+				}
 			}
 			int width = 0, maxWidth = wrapWidth - lineWidth;
 			while (width + piDx[start] < maxWidth) {
@@ -435,7 +448,12 @@ void computeRuns (GC gc) {
 					if (iDx != item.width) {
 						item.justify = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, item.glyphCount * 4);
 						if (item.justify == 0) SWT.error(SWT.ERROR_NO_HANDLES);
-						OS.ScriptJustify(item.visAttrs, item.advances, item.glyphCount, iDx - item.width, 2, item.justify);
+						int hr = OS.ScriptJustify(item.visAttrs, item.advances, item.glyphCount, iDx - item.width, 2, item.justify);
+						if (hr != OS.S_OK) {
+							SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null,
+									String.format(": ScriptJustify failed with return code 0x%08x for glyphs of len %d",
+											hr, item.glyphCount));
+						}
 						item.width = iDx;
 					}
 					newLineWidth += item.width;
@@ -1034,11 +1052,27 @@ RECT drawRunText(long hdc, StyleItem run, RECT rect, int baselineInPixels, int c
 		}
 	}
 	OS.SetTextColor(hdc, color);
-	OS.ScriptTextOut(hdc, run.psc, x, y, 0, null, run.analysis , 0, 0, run.glyphs, run.glyphCount, run.advances, run.justify, run.goffsets);
+	if (run.glyphCount > 0) {
+		assert run.glyphCount <= 65536;
+		int hr = OS.ScriptTextOut(hdc, run.psc, x, y, 0, null, run.analysis, 0, 0, run.glyphs, run.glyphCount,
+				run.advances, run.justify, run.goffsets);
+		if (hr != OS.S_OK) {
+			SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null, String
+					.format(": ScriptTextOut failed with return code 0x%08x for glyphs of len %d", hr, run.glyphCount));
+		}
+	}
 	if (partialSelection) {
 		getPartialSelection(run, selectionStart, selectionEnd, rect);
 		OS.SetTextColor(hdc, selectionColor);
-		OS.ScriptTextOut(hdc, run.psc, x, y, OS.ETO_CLIPPED, rect, run.analysis , 0, 0, run.glyphs, run.glyphCount, run.advances, run.justify, run.goffsets);
+		if (run.glyphCount > 0) {
+			assert run.glyphCount <= 65536;
+			int hr = OS.ScriptTextOut(hdc, run.psc, x, y, OS.ETO_CLIPPED, rect, run.analysis, 0, 0, run.glyphs,
+					run.glyphCount, run.advances, run.justify, run.goffsets);
+			if (hr != OS.S_OK) {
+				SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null, String.format(
+						": ScriptTextOut failed with return code 0x%08x for glyphs of len %d", hr, run.glyphCount));
+			}
+		}
 	}
 	return fullSelection || partialSelection ? rect : null;
 }
@@ -2104,11 +2138,19 @@ Point getLocationInPixels (int offset, boolean trailing) {
  * @return x position of the caret.
  */
 private int ScriptCPtoX(int characterPosition, boolean trailing, StyleItem run) {
-	int[] piX = new int[1];
-	long advances = run.justify != 0 ? run.justify : run.advances;
-	OS.ScriptCPtoX(characterPosition, trailing, run.length, run.glyphCount, run.clusters, run.visAttrs, advances,
-			run.analysis, piX);
-	return piX[0];
+	if (run.glyphCount == 0) {
+		return 0;
+	} else {
+		int[] piX = new int[1];
+		long advances = run.justify != 0 ? run.justify : run.advances;
+		int hr = OS.ScriptCPtoX(characterPosition, trailing, run.length, run.glyphCount, run.clusters, run.visAttrs,
+				advances, run.analysis, piX);
+		if (hr != OS.S_OK) {
+			SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null, String
+					.format(": ScriptCPtoX failed with return code 0x%08x for glyphs of len %d", hr, run.glyphCount));
+		}
+		return piX[0];
+	}
 }
 
 /**
@@ -2319,7 +2361,11 @@ int getOffsetInPixels (int x, int y, int[] trailing) {
 				xRun = run.width - xRun;
 			}
 			long advances = run.justify != 0 ? run.justify : run.advances;
-			OS.ScriptXtoCP(xRun, cChars, cGlyphs, run.clusters, run.visAttrs, advances, run.analysis, piCP, piTrailing);
+			int hr = OS.ScriptXtoCP(xRun, cChars, cGlyphs, run.clusters, run.visAttrs, advances, run.analysis, piCP, piTrailing);
+			if (hr != OS.S_OK) {
+				SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null, String.format(
+						": ScriptXtoCP failed with return code 0x%08x for glyphs of len %d", hr, cGlyphs));
+			}
 			int offset = run.start + piCP[0];
 			int length = segmentsText.length();
 			char ch = offset < length ? segmentsText.charAt(offset) : 0;
@@ -2724,8 +2770,13 @@ StyleItem[] itemize () {
 	*/
 //	scriptControl.fReserved = 0x1;
 
-	OS.ScriptApplyDigitSubstitution(0, scriptControl, scriptState);
-
+	{
+		int hr = OS.ScriptApplyDigitSubstitution(0, scriptControl, scriptState);
+		if (hr != OS.S_OK) {
+			SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null,
+					String.format(": ScriptApplyDigitSubstitution failed with return code 0x%08x", hr));
+		}
+	}
 	long hHeap = OS.GetProcessHeap();
 	long pItems = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, MAX_ITEM * SCRIPT_ITEM.sizeof);
 	if (pItems == 0) SWT.error(SWT.ERROR_NO_HANDLES);
@@ -2757,9 +2808,17 @@ StyleItem[] itemize () {
 		}
 	}
 
-	OS.ScriptItemize(chars, length, MAX_ITEM, scriptControl, scriptState, pItems, pcItems);
-
-//	if (hr == E_OUTOFMEMORY) //TODO handle it
+	if (length == 0) {
+		// XXX: There is a bunch of other code above that could be skipped when length == 0
+		pcItems[0] = 0;
+	} else {
+		int hr = OS.ScriptItemize(chars, length, MAX_ITEM, scriptControl, scriptState, pItems, pcItems);
+	//	if (hr == E_OUTOFMEMORY) //TODO handle it
+		if (hr != OS.S_OK) {
+			SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null, String
+					.format(": ScriptItemize failed with return code 0x%08x", hr));
+		}
+	}
 
 	StyleItem[] runs = merge(pItems, pcItems[0]);
 	OS.HeapFree(hHeap, 0, pItems);
@@ -2897,7 +2956,10 @@ StyleItem[] reorder (StyleItem[] runs, boolean terminate) {
 		bidiLevels[length - 1] = 0;
 	}
 	int[] log2vis = new int[length];
-	OS.ScriptLayout(length, bidiLevels, null, log2vis);
+	int hr = OS.ScriptLayout(length, bidiLevels, null, log2vis);
+	if (hr != OS.S_OK) {
+		SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null, String.format(": ScriptLayout failed with return code 0x%08x", hr));
+	}
 	StyleItem[] result = new StyleItem[length];
 	for (int i=0; i<length; i++) {
 		result[log2vis[i]] = runs[i];
@@ -3455,7 +3517,11 @@ boolean shape (long hdc, StyleItem run, char[] chars, int[] glyphCount, int maxG
 		if (run.analysis.fNoGlyphIndex) return true;
 		SCRIPT_FONTPROPERTIES fp = new SCRIPT_FONTPROPERTIES ();
 		fp.cBytes = SCRIPT_FONTPROPERTIES.sizeof;
-		OS.ScriptGetFontProperties(hdc, run.psc, fp);
+		int hr2 = OS.ScriptGetFontProperties(hdc, run.psc, fp);
+		if (hr2 != OS.S_OK) {
+			SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null,
+					String.format(": ScriptGetFontProperties failed with return code 0x%08x", hr2));
+		}
 		short[] glyphs = new short[glyphCount[0]];
 		OS.MoveMemory(glyphs, run.glyphs, glyphs.length * 2);
 		int i;
@@ -3661,7 +3727,11 @@ void shape (final long hdc, final StyleItem run) {
 		* Give up and shape the run with the default font.
 		* Missing glyphs typically will be represent as black boxes in the text.
 		*/
-		OS.ScriptShape(hdc, run.psc, chars, chars.length, maxGlyphs, run.analysis, run.glyphs, run.clusters, run.visAttrs, buffer);
+		int hr = OS.ScriptShape(hdc, run.psc, chars, chars.length, maxGlyphs, run.analysis, run.glyphs, run.clusters, run.visAttrs, buffer);
+		if (hr != OS.S_OK) {
+			SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null, String
+					.format(": ScriptShape failed with return code 0x%08x for chars of len %d", hr, chars.length));
+		}
 		run.glyphCount = buffer[0];
 	}
 	int[] abc = new int[3];
@@ -3669,7 +3739,11 @@ void shape (final long hdc, final StyleItem run) {
 	if (run.advances == 0) SWT.error(SWT.ERROR_NO_HANDLES);
 	run.goffsets = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, run.glyphCount * GOFFSET_SIZEOF);
 	if (run.goffsets == 0) SWT.error(SWT.ERROR_NO_HANDLES);
-	OS.ScriptPlace(hdc, run.psc, run.glyphs, run.glyphCount, run.visAttrs, run.analysis, run.advances, run.goffsets, abc);
+	int hr = OS.ScriptPlace(hdc, run.psc, run.glyphs, run.glyphCount, run.visAttrs, run.analysis, run.advances, run.goffsets, abc);
+	if (hr != OS.S_OK) {
+		SWT.error(SWT.ERROR_NOT_IMPLEMENTED, null,
+				String.format(": ScriptPlace failed with return code 0x%08x for glyphs of len %d", hr, run.glyphCount));
+	}
 	run.width = abc[0] + abc[1] + abc[2];
 	TextStyle style = run.style;
 	if (style != null) {
