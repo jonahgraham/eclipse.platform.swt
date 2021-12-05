@@ -1064,8 +1064,9 @@ private int[][] draw(String input, int antialias) {
 		layout = new TextLayout(display);
 		layout.setFont(font);
 		layout.setText(input);
+		layout.setWidth(70);
 		image = draw(layout, antialias);
-//		SwtTestUtil.debugDisplayImage(image);
+		SwtTestUtil.debugDisplayImage(image);
 		assertTrue("Found no drawn pixels, nothing at all was drawn!",
 		SwtTestUtil.hasPixelNotMatching(image, display.getSystemColor(SWT.COLOR_WHITE), image.getBounds()));
 		return SwtTestUtil.getAllPixels(image);
@@ -1133,6 +1134,7 @@ private void debugCompareTwoImages(int[][] pixelsOnce, int[][] pixelsRepeated, i
 private void check(String input, int repeat) {
 	// Run with antialias in multiple modes as it causes different rendering engines
 	// to be used (GDI or GDI+)
+	System.out.println(input);
 	check(input, repeat, SWT.DEFAULT);
 	check(input, repeat, SWT.ON);
 	check(input, repeat, SWT.OFF);
@@ -1162,14 +1164,17 @@ public void test_bug23406_longLines() {
 
 	// These first two checks really test the test works fine and
 	// should pass with or without the fix to Bug 23406
-	check("A", 100);
-	check("AV", 100);
-
-	check("A", 100000);
-	check("A A", 30000);
+//	check("A", 100);
+//	check("AV", 100);
+//
+//	check("A", 100000);
+//	check("A A", 30000);
+	// RTL letters
+//	String arabicPersian = "عربي فارسی";
+//	check(arabicPersian.repeat(10), 10);
 	// This is a single code point, if this gets split then the drawing is corrupted
 	String crocodile = "\uD83D\uDC0A";
-	check(crocodile, 30000);
+//	check(crocodile.repeat(10), 10);
 	// This contains single glyphs requiring multiple characters, if those groups of
 	// characters gets split then the drawing is corrupted
 	// "This is the best computer program." translated into Thai:
@@ -1177,7 +1182,10 @@ public void test_bug23406_longLines() {
 	// errors can't corrupt it.
 	String bestProgramInThai = "\u0E19\u0E35\u0E48\u0E04\u0E37\u0E2D\u0E42\u0E1B\u0E23\u0E41\u0E01\u0E23\u0E21\u0E04"
 			+ "\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\u0E17\u0E35\u0E48\u0E14\u0E35\u0E17\u0E35\u0E48\u0E2A\u0E38\u0E14";
-	check(bestProgramInThai, 1000);
+//	System.out.println(bestProgramInThai.length());
+//	check(bestProgramInThai, 1000);
+	check(bestProgramInThai + "\n" + crocodile.repeat(10) + "\n" + "AA ".repeat(10), 1000);
+
 }
 
 }

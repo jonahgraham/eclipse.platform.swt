@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -87,6 +87,7 @@ typedef enum {
 	Graphics_1DrawArc_FUNC,
 	Graphics_1DrawDriverString__JJIJJLorg_eclipse_swt_internal_gdip_PointF_2IJ_FUNC,
 	Graphics_1DrawDriverString__JJIJJ_3FIJ_FUNC,
+	Graphics_1DrawDriverString__J_3SIJJ_3FIJ_FUNC,
 	Graphics_1DrawEllipse_FUNC,
 	Graphics_1DrawImage__JJII_FUNC,
 	Graphics_1DrawImage__JJLorg_eclipse_swt_internal_gdip_Rect_2IIIIIJJJ_FUNC,

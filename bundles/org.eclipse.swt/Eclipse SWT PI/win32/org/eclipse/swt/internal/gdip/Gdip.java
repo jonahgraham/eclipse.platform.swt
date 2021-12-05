@@ -340,6 +340,16 @@ public static final native int Graphics_DrawDriverString(long graphics, long tex
 /**
  * @method flags=cpp
  * @param graphics cast=(Graphics *)
+ * @param text cast=(const UINT16 *)
+ * @param font cast=(const Font *)
+ * @param brush cast=(const Brush *)
+ * @param positions cast=(const PointF *),flags=no_out
+ * @param matrix cast=(const Matrix *)
+ */
+public static final native int Graphics_DrawDriverString(long graphics, short[] text, int length, long font, long brush, float[] positions, int flags, long matrix);
+/**
+ * @method flags=cpp
+ * @param graphics cast=(Graphics *)
  * @param pen cast=(Pen *)
  */
 public static final native int Graphics_DrawEllipse(long graphics, long pen, int x, int y, int width, int height);

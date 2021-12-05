@@ -7508,17 +7508,23 @@ fail:
 
 #ifndef NO_ScriptCPtoX
 JNIEXPORT jint JNICALL OS_NATIVE(ScriptCPtoX)
-	(JNIEnv *env, jclass that, jint arg0, jboolean arg1, jint arg2, jint arg3, jlong arg4, jlong arg5, jlong arg6, jobject arg7, jintArray arg8)
+	(JNIEnv *env, jclass that, jint arg0, jboolean arg1, jint arg2, jint arg3, jshortArray arg4, jlong arg5, jintArray arg6, jobject arg7, jintArray arg8)
 {
+	jshort *lparg4=NULL;
+	jint *lparg6=NULL;
 	SCRIPT_ANALYSIS _arg7, *lparg7=NULL;
 	jint *lparg8=NULL;
 	jint rc = 0;
 	OS_NATIVE_ENTER(env, that, ScriptCPtoX_FUNC);
+	if (arg4) if ((lparg4 = (*env)->GetShortArrayElements(env, arg4, NULL)) == NULL) goto fail;
+	if (arg6) if ((lparg6 = (*env)->GetIntArrayElements(env, arg6, NULL)) == NULL) goto fail;
 	if (arg7) if ((lparg7 = getSCRIPT_ANALYSISFields(env, arg7, &_arg7)) == NULL) goto fail;
 	if (arg8) if ((lparg8 = (*env)->GetIntArrayElements(env, arg8, NULL)) == NULL) goto fail;
-	rc = (jint)ScriptCPtoX(arg0, arg1, arg2, arg3, (const WORD *)arg4, (const SCRIPT_VISATTR *)arg5, (const int *)arg6, (const SCRIPT_ANALYSIS *)lparg7, (int *)lparg8);
+	rc = (jint)ScriptCPtoX(arg0, arg1, arg2, arg3, (const WORD *)lparg4, (const SCRIPT_VISATTR *)arg5, (const int *)lparg6, (const SCRIPT_ANALYSIS *)lparg7, (int *)lparg8);
 fail:
 	if (arg8 && lparg8) (*env)->ReleaseIntArrayElements(env, arg8, lparg8, 0);
+	if (arg6 && lparg6) (*env)->ReleaseIntArrayElements(env, arg6, lparg6, 0);
+	if (arg4 && lparg4) (*env)->ReleaseShortArrayElements(env, arg4, lparg4, 0);
 	OS_NATIVE_EXIT(env, that, ScriptCPtoX_FUNC);
 	return rc;
 }
@@ -7589,17 +7595,23 @@ fail:
 
 #ifndef NO_ScriptGetLogicalWidths
 JNIEXPORT jint JNICALL OS_NATIVE(ScriptGetLogicalWidths)
-	(JNIEnv *env, jclass that, jobject arg0, jint arg1, jint arg2, jlong arg3, jlong arg4, jlong arg5, jintArray arg6)
+	(JNIEnv *env, jclass that, jobject arg0, jint arg1, jint arg2, jintArray arg3, jshortArray arg4, jlong arg5, jintArray arg6)
 {
 	SCRIPT_ANALYSIS _arg0, *lparg0=NULL;
+	jint *lparg3=NULL;
+	jshort *lparg4=NULL;
 	jint *lparg6=NULL;
 	jint rc = 0;
 	OS_NATIVE_ENTER(env, that, ScriptGetLogicalWidths_FUNC);
 	if (arg0) if ((lparg0 = getSCRIPT_ANALYSISFields(env, arg0, &_arg0)) == NULL) goto fail;
+	if (arg3) if ((lparg3 = (*env)->GetIntArrayElements(env, arg3, NULL)) == NULL) goto fail;
+	if (arg4) if ((lparg4 = (*env)->GetShortArrayElements(env, arg4, NULL)) == NULL) goto fail;
 	if (arg6) if ((lparg6 = (*env)->GetIntArrayElements(env, arg6, NULL)) == NULL) goto fail;
-	rc = (jint)ScriptGetLogicalWidths((const SCRIPT_ANALYSIS *)lparg0, arg1, arg2, (const int *)arg3, (const WORD *)arg4, (const SCRIPT_VISATTR *)arg5, (int *)lparg6);
+	rc = (jint)ScriptGetLogicalWidths((const SCRIPT_ANALYSIS *)lparg0, arg1, arg2, (const int *)lparg3, (const WORD *)lparg4, (const SCRIPT_VISATTR *)arg5, (int *)lparg6);
 fail:
 	if (arg6 && lparg6) (*env)->ReleaseIntArrayElements(env, arg6, lparg6, 0);
+	if (arg4 && lparg4) (*env)->ReleaseShortArrayElements(env, arg4, lparg4, 0);
+	if (arg3 && lparg3) (*env)->ReleaseIntArrayElements(env, arg3, lparg3, 0);
 	OS_NATIVE_EXIT(env, that, ScriptGetLogicalWidths_FUNC);
 	return rc;
 }
@@ -7649,11 +7661,18 @@ fail:
 
 #ifndef NO_ScriptJustify
 JNIEXPORT jint JNICALL OS_NATIVE(ScriptJustify)
-	(JNIEnv *env, jclass that, jlong arg0, jlong arg1, jint arg2, jint arg3, jint arg4, jlong arg5)
+	(JNIEnv *env, jclass that, jlong arg0, jintArray arg1, jint arg2, jint arg3, jint arg4, jintArray arg5)
 {
+	jint *lparg1=NULL;
+	jint *lparg5=NULL;
 	jint rc = 0;
 	OS_NATIVE_ENTER(env, that, ScriptJustify_FUNC);
-	rc = (jint)ScriptJustify((SCRIPT_VISATTR *)arg0, (const int *)arg1, arg2, arg3, arg4, (int *)arg5);
+	if (arg1) if ((lparg1 = (*env)->GetIntArrayElements(env, arg1, NULL)) == NULL) goto fail;
+	if (arg5) if ((lparg5 = (*env)->GetIntArrayElements(env, arg5, NULL)) == NULL) goto fail;
+	rc = (jint)ScriptJustify((SCRIPT_VISATTR *)arg0, (const int *)lparg1, arg2, arg3, arg4, (int *)lparg5);
+fail:
+	if (arg5 && lparg5) (*env)->ReleaseIntArrayElements(env, arg5, lparg5, 0);
+	if (arg1 && lparg1) (*env)->ReleaseIntArrayElements(env, arg1, lparg1, 0);
 	OS_NATIVE_EXIT(env, that, ScriptJustify_FUNC);
 	return rc;
 }
@@ -7683,18 +7702,24 @@ fail:
 
 #ifndef NO_ScriptPlace
 JNIEXPORT jint JNICALL OS_NATIVE(ScriptPlace)
-	(JNIEnv *env, jclass that, jlong arg0, jlong arg1, jlong arg2, jint arg3, jlong arg4, jobject arg5, jlong arg6, jlong arg7, jintArray arg8)
+	(JNIEnv *env, jclass that, jlong arg0, jlong arg1, jshortArray arg2, jint arg3, jlong arg4, jobject arg5, jintArray arg6, jlong arg7, jintArray arg8)
 {
+	jshort *lparg2=NULL;
 	SCRIPT_ANALYSIS _arg5, *lparg5=NULL;
+	jint *lparg6=NULL;
 	jint *lparg8=NULL;
 	jint rc = 0;
 	OS_NATIVE_ENTER(env, that, ScriptPlace_FUNC);
+	if (arg2) if ((lparg2 = (*env)->GetShortArrayElements(env, arg2, NULL)) == NULL) goto fail;
 	if (arg5) if ((lparg5 = getSCRIPT_ANALYSISFields(env, arg5, &_arg5)) == NULL) goto fail;
+	if (arg6) if ((lparg6 = (*env)->GetIntArrayElements(env, arg6, NULL)) == NULL) goto fail;
 	if (arg8) if ((lparg8 = (*env)->GetIntArrayElements(env, arg8, NULL)) == NULL) goto fail;
-	rc = (jint)ScriptPlace((HDC)arg0, (SCRIPT_CACHE *)arg1, (const WORD *)arg2, arg3, (const SCRIPT_VISATTR *)arg4, (SCRIPT_ANALYSIS *)lparg5, (int *)arg6, (GOFFSET *)arg7, (ABC *)lparg8);
+	rc = (jint)ScriptPlace((HDC)arg0, (SCRIPT_CACHE *)arg1, (const WORD *)lparg2, arg3, (const SCRIPT_VISATTR *)arg4, (SCRIPT_ANALYSIS *)lparg5, (int *)lparg6, (GOFFSET *)arg7, (ABC *)lparg8);
 fail:
 	if (arg8 && lparg8) (*env)->ReleaseIntArrayElements(env, arg8, lparg8, 0);
+	if (arg6 && lparg6) (*env)->ReleaseIntArrayElements(env, arg6, lparg6, 0);
 	if (arg5 && lparg5) setSCRIPT_ANALYSISFields(env, arg5, lparg5);
+	if (arg2 && lparg2) (*env)->ReleaseShortArrayElements(env, arg2, lparg2, 0);
 	OS_NATIVE_EXIT(env, that, ScriptPlace_FUNC);
 	return rc;
 }
@@ -7702,19 +7727,25 @@ fail:
 
 #ifndef NO_ScriptShape
 JNIEXPORT jint JNICALL OS_NATIVE(ScriptShape)
-	(JNIEnv *env, jclass that, jlong arg0, jlong arg1, jcharArray arg2, jint arg3, jint arg4, jobject arg5, jlong arg6, jlong arg7, jlong arg8, jintArray arg9)
+	(JNIEnv *env, jclass that, jlong arg0, jlong arg1, jcharArray arg2, jint arg3, jint arg4, jobject arg5, jshortArray arg6, jshortArray arg7, jlong arg8, jintArray arg9)
 {
 	jchar *lparg2=NULL;
 	SCRIPT_ANALYSIS _arg5, *lparg5=NULL;
+	jshort *lparg6=NULL;
+	jshort *lparg7=NULL;
 	jint *lparg9=NULL;
 	jint rc = 0;
 	OS_NATIVE_ENTER(env, that, ScriptShape_FUNC);
 	if (arg2) if ((lparg2 = (*env)->GetCharArrayElements(env, arg2, NULL)) == NULL) goto fail;
 	if (arg5) if ((lparg5 = getSCRIPT_ANALYSISFields(env, arg5, &_arg5)) == NULL) goto fail;
+	if (arg6) if ((lparg6 = (*env)->GetShortArrayElements(env, arg6, NULL)) == NULL) goto fail;
+	if (arg7) if ((lparg7 = (*env)->GetShortArrayElements(env, arg7, NULL)) == NULL) goto fail;
 	if (arg9) if ((lparg9 = (*env)->GetIntArrayElements(env, arg9, NULL)) == NULL) goto fail;
-	rc = (jint)ScriptShape((HDC)arg0, (SCRIPT_CACHE *)arg1, (const WCHAR *)lparg2, arg3, arg4, (SCRIPT_ANALYSIS *)lparg5, (WORD *)arg6, (WORD *)arg7, (SCRIPT_VISATTR *)arg8, (int *)lparg9);
+	rc = (jint)ScriptShape((HDC)arg0, (SCRIPT_CACHE *)arg1, (const WCHAR *)lparg2, arg3, arg4, (SCRIPT_ANALYSIS *)lparg5, (WORD *)lparg6, (WORD *)lparg7, (SCRIPT_VISATTR *)arg8, (int *)lparg9);
 fail:
 	if (arg9 && lparg9) (*env)->ReleaseIntArrayElements(env, arg9, lparg9, 0);
+	if (arg7 && lparg7) (*env)->ReleaseShortArrayElements(env, arg7, lparg7, 0);
+	if (arg6 && lparg6) (*env)->ReleaseShortArrayElements(env, arg6, lparg6, 0);
 	if (arg5 && lparg5) setSCRIPT_ANALYSISFields(env, arg5, lparg5);
 	if (arg2 && lparg2) (*env)->ReleaseCharArrayElements(env, arg2, lparg2, JNI_ABORT);
 	OS_NATIVE_EXIT(env, that, ScriptShape_FUNC);
@@ -7771,16 +7802,25 @@ fail:
 
 #ifndef NO_ScriptTextOut
 JNIEXPORT jint JNICALL OS_NATIVE(ScriptTextOut)
-	(JNIEnv *env, jclass that, jlong arg0, jlong arg1, jint arg2, jint arg3, jint arg4, jobject arg5, jobject arg6, jlong arg7, jint arg8, jlong arg9, jint arg10, jlong arg11, jlong arg12, jlong arg13)
+	(JNIEnv *env, jclass that, jlong arg0, jlong arg1, jint arg2, jint arg3, jint arg4, jobject arg5, jobject arg6, jlong arg7, jint arg8, jshortArray arg9, jint arg10, jintArray arg11, jintArray arg12, jlong arg13)
 {
 	RECT _arg5, *lparg5=NULL;
 	SCRIPT_ANALYSIS _arg6, *lparg6=NULL;
+	jshort *lparg9=NULL;
+	jint *lparg11=NULL;
+	jint *lparg12=NULL;
 	jint rc = 0;
 	OS_NATIVE_ENTER(env, that, ScriptTextOut_FUNC);
 	if (arg5) if ((lparg5 = getRECTFields(env, arg5, &_arg5)) == NULL) goto fail;
 	if (arg6) if ((lparg6 = getSCRIPT_ANALYSISFields(env, arg6, &_arg6)) == NULL) goto fail;
-	rc = (jint)ScriptTextOut((const HDC)arg0, (SCRIPT_CACHE *)arg1, arg2, arg3, arg4, (const RECT *)lparg5, (const SCRIPT_ANALYSIS *)lparg6, (const WCHAR *)arg7, arg8, (const WORD *)arg9, arg10, (const int *)arg11, (const int *)arg12, (const GOFFSET *)arg13);
+	if (arg9) if ((lparg9 = (*env)->GetShortArrayElements(env, arg9, NULL)) == NULL) goto fail;
+	if (arg11) if ((lparg11 = (*env)->GetIntArrayElements(env, arg11, NULL)) == NULL) goto fail;
+	if (arg12) if ((lparg12 = (*env)->GetIntArrayElements(env, arg12, NULL)) == NULL) goto fail;
+	rc = (jint)ScriptTextOut((const HDC)arg0, (SCRIPT_CACHE *)arg1, arg2, arg3, arg4, (const RECT *)lparg5, (const SCRIPT_ANALYSIS *)lparg6, (const WCHAR *)arg7, arg8, (const WORD *)lparg9, arg10, (const int *)lparg11, (const int *)lparg12, (const GOFFSET *)arg13);
 fail:
+	if (arg12 && lparg12) (*env)->ReleaseIntArrayElements(env, arg12, lparg12, 0);
+	if (arg11 && lparg11) (*env)->ReleaseIntArrayElements(env, arg11, lparg11, 0);
+	if (arg9 && lparg9) (*env)->ReleaseShortArrayElements(env, arg9, lparg9, 0);
 	OS_NATIVE_EXIT(env, that, ScriptTextOut_FUNC);
 	return rc;
 }
@@ -7788,20 +7828,26 @@ fail:
 
 #ifndef NO_ScriptXtoCP
 JNIEXPORT jint JNICALL OS_NATIVE(ScriptXtoCP)
-	(JNIEnv *env, jclass that, jint arg0, jint arg1, jint arg2, jlong arg3, jlong arg4, jlong arg5, jobject arg6, jintArray arg7, jintArray arg8)
+	(JNIEnv *env, jclass that, jint arg0, jint arg1, jint arg2, jshortArray arg3, jlong arg4, jintArray arg5, jobject arg6, jintArray arg7, jintArray arg8)
 {
+	jshort *lparg3=NULL;
+	jint *lparg5=NULL;
 	SCRIPT_ANALYSIS _arg6, *lparg6=NULL;
 	jint *lparg7=NULL;
 	jint *lparg8=NULL;
 	jint rc = 0;
 	OS_NATIVE_ENTER(env, that, ScriptXtoCP_FUNC);
+	if (arg3) if ((lparg3 = (*env)->GetShortArrayElements(env, arg3, NULL)) == NULL) goto fail;
+	if (arg5) if ((lparg5 = (*env)->GetIntArrayElements(env, arg5, NULL)) == NULL) goto fail;
 	if (arg6) if ((lparg6 = getSCRIPT_ANALYSISFields(env, arg6, &_arg6)) == NULL) goto fail;
 	if (arg7) if ((lparg7 = (*env)->GetIntArrayElements(env, arg7, NULL)) == NULL) goto fail;
 	if (arg8) if ((lparg8 = (*env)->GetIntArrayElements(env, arg8, NULL)) == NULL) goto fail;
-	rc = (jint)ScriptXtoCP(arg0, arg1, arg2, (const WORD *)arg3, (const SCRIPT_VISATTR *)arg4, (const int *)arg5, (const SCRIPT_ANALYSIS *)lparg6, (int *)lparg7, (int *)lparg8);
+	rc = (jint)ScriptXtoCP(arg0, arg1, arg2, (const WORD *)lparg3, (const SCRIPT_VISATTR *)arg4, (const int *)lparg5, (const SCRIPT_ANALYSIS *)lparg6, (int *)lparg7, (int *)lparg8);
 fail:
 	if (arg8 && lparg8) (*env)->ReleaseIntArrayElements(env, arg8, lparg8, 0);
 	if (arg7 && lparg7) (*env)->ReleaseIntArrayElements(env, arg7, lparg7, 0);
+	if (arg5 && lparg5) (*env)->ReleaseIntArrayElements(env, arg5, lparg5, 0);
+	if (arg3 && lparg3) (*env)->ReleaseShortArrayElements(env, arg3, lparg3, 0);
 	OS_NATIVE_EXIT(env, that, ScriptXtoCP_FUNC);
 	return rc;
 }

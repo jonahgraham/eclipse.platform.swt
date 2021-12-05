@@ -3940,7 +3940,7 @@ public static final native int ScriptCacheGetHeight (long hdc, long psc, int[] t
  * @param psa cast=(const SCRIPT_ANALYSIS *),flags=no_out
  * @param piX cast=(int *)
  */
-public static final native int ScriptCPtoX (int iCP, boolean fTrailing, int cChars, int cGlyphs, long pwLogClust, long psva, long piAdvance, SCRIPT_ANALYSIS psa, int[] piX);
+public static final native int ScriptCPtoX (int iCP, boolean fTrailing, int cChars, int cGlyphs, short[] pwLogClust, long psva, int[] piAdvance, SCRIPT_ANALYSIS psa, int[] piX);
 /** @param psc cast=(SCRIPT_CACHE *) */
 public static final native int ScriptFreeCache (long psc);
 /**
@@ -3956,7 +3956,7 @@ public static final native int ScriptGetFontProperties (long hdc, long psc, SCRI
  * @param psva cast=(const SCRIPT_VISATTR *)
  * @param piDx cast=(int *)
  */
-public static final native int ScriptGetLogicalWidths (SCRIPT_ANALYSIS psa, int cChars, int cGlyphs, long piGlyphWidth, long pwLogClust, long psva, int[] piDx);
+public static final native int ScriptGetLogicalWidths (SCRIPT_ANALYSIS psa, int cChars, int cGlyphs, int[] piGlyphWidth, short[] pwLogClust, long psva, int[] piDx);
 /**
  * @param pwcInChars cast=(const WCHAR *),flags=no_out
  * @param psControl cast=(const SCRIPT_CONTROL *),flags=no_out
@@ -3970,7 +3970,7 @@ public static final native int ScriptItemize (char[] pwcInChars, int cInChars, i
  * @param piAdvance cast=(const int *)
  * @param piJustify cast=(int *)
  */
-public static final native int ScriptJustify (long psva, long piAdvance, int cGlyphs, int iDx, int iMinKashida, long piJustify);
+public static final native int ScriptJustify (long psva, int[] piAdvance, int cGlyphs, int iDx, int iMinKashida, int[] piJustify);
 /**
  * @param pbLevel cast=(const BYTE *),flags=no_out
  * @param piVisualToLogical cast=(int *)
@@ -3987,7 +3987,7 @@ public static final native int ScriptLayout (int cRuns, byte[] pbLevel, int[] pi
  * @param pGoffset cast=(GOFFSET *)
  * @param pABC cast=(ABC *)
  */
-public static final native int ScriptPlace (long hdc, long psc, long pwGlyphs, int cGlyphs, long psva, SCRIPT_ANALYSIS psa, long piAdvance, long pGoffset, int[] pABC);
+public static final native int ScriptPlace (long hdc, long psc, short[] pwGlyphs, int cGlyphs, long psva, SCRIPT_ANALYSIS psa, int[] piAdvance, long pGoffset, int[] pABC);
 /**
  * @param hdc cast=(HDC)
  * @param psc cast=(SCRIPT_CACHE *)
@@ -4005,7 +4005,7 @@ public static final native int ScriptGetCMap (long hdc, long psc, char[] pwcChar
  * @param psva cast=(SCRIPT_VISATTR *)
  * @param pcGlyphs cast=(int *)
  */
-public static final native int ScriptShape (long hdc, long psc, char[] pwcChars, int cChars, int cMaxGlyphs, SCRIPT_ANALYSIS psa, long pwOutGlyphs, long pwLogClust, long psva, int[] pcGlyphs);
+public static final native int ScriptShape (long hdc, long psc, char[] pwcChars, int cChars, int cMaxGlyphs, SCRIPT_ANALYSIS psa, short[] pwOutGlyphs, short[] pwLogClust, long psva, int[] pcGlyphs);
 /**
  * @param hdc cast=(HDC)
  * @param pString cast=(const void*)
@@ -4030,7 +4030,7 @@ public static final native int ScriptStringFree(long pssa);
  * @param piJustify cast=(const int *)
  * @param pGoffset cast=(const GOFFSET *)
  */
-public static final native int ScriptTextOut (long hdc, long psc, int x, int y, int fuOptions, RECT lprc, SCRIPT_ANALYSIS psa, long pwcReserved, int iReserved, long pwGlyphs, int cGlyphs, long piAdvance, long piJustify, long pGoffset);
+public static final native int ScriptTextOut (long hdc, long psc, int x, int y, int fuOptions, RECT lprc, SCRIPT_ANALYSIS psa, long pwcReserved, int iReserved, short[] pwGlyphs, int cGlyphs, int[] piAdvance, int[] piJustify, long pGoffset);
 /**
  * @param pwLogClust cast=(const WORD *)
  * @param psva cast=(const SCRIPT_VISATTR *)
@@ -4039,7 +4039,7 @@ public static final native int ScriptTextOut (long hdc, long psc, int x, int y, 
  * @param piCP cast=(int *)
  * @param piTrailing cast=(int *)
  */
-public static final native int ScriptXtoCP (int iX, int cChars, int cGlyphs, long pwLogClust, long psva, long piAdvance, SCRIPT_ANALYSIS psa, int[] piCP, int[] piTrailing);
+public static final native int ScriptXtoCP (int iX, int cChars, int cGlyphs, short[] pwLogClust, long psva, int[] piAdvance, SCRIPT_ANALYSIS psa, int[] piCP, int[] piTrailing);
 /**
  * @param hWnd cast=(HWND)
  * @param hrgnUpdate cast=(HRGN)

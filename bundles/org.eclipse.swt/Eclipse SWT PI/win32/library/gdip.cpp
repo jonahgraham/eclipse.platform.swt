@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -808,6 +808,26 @@ JNIEXPORT jint JNICALL Gdip_NATIVE(Graphics_1DrawDriverString__JJIJJ_3FIJ)
 fail:
 	if (arg5 && lparg5) env->ReleaseFloatArrayElements(arg5, lparg5, JNI_ABORT);
 	Gdip_NATIVE_EXIT(env, that, Graphics_1DrawDriverString__JJIJJ_3FIJ_FUNC);
+	return rc;
+}
+#endif
+
+#ifndef NO_Graphics_1DrawDriverString__J_3SIJJ_3FIJ
+extern "C" JNIEXPORT jint JNICALL Gdip_NATIVE(Graphics_1DrawDriverString__J_3SIJJ_3FIJ)(JNIEnv *env, jclass that, jlong arg0, jshortArray arg1, jint arg2, jlong arg3, jlong arg4, jfloatArray arg5, jint arg6, jlong arg7);
+JNIEXPORT jint JNICALL Gdip_NATIVE(Graphics_1DrawDriverString__J_3SIJJ_3FIJ)
+	(JNIEnv *env, jclass that, jlong arg0, jshortArray arg1, jint arg2, jlong arg3, jlong arg4, jfloatArray arg5, jint arg6, jlong arg7)
+{
+	jshort *lparg1=NULL;
+	jfloat *lparg5=NULL;
+	jint rc = 0;
+	Gdip_NATIVE_ENTER(env, that, Graphics_1DrawDriverString__J_3SIJJ_3FIJ_FUNC);
+	if (arg1) if ((lparg1 = env->GetShortArrayElements(arg1, NULL)) == NULL) goto fail;
+	if (arg5) if ((lparg5 = env->GetFloatArrayElements(arg5, NULL)) == NULL) goto fail;
+	rc = (jint)((Graphics *)arg0)->DrawDriverString((const UINT16 *)lparg1, arg2, (const Font *)arg3, (const Brush *)arg4, (const PointF *)lparg5, arg6, (const Matrix *)arg7);
+fail:
+	if (arg5 && lparg5) env->ReleaseFloatArrayElements(arg5, lparg5, JNI_ABORT);
+	if (arg1 && lparg1) env->ReleaseShortArrayElements(arg1, lparg1, 0);
+	Gdip_NATIVE_EXIT(env, that, Graphics_1DrawDriverString__J_3SIJJ_3FIJ_FUNC);
 	return rc;
 }
 #endif

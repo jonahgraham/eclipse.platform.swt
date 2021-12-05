@@ -2490,7 +2490,7 @@ RectF drawText(long gdipGraphics, char[] buffer, int start, int length, int x, i
 	result.nGlyphs = nGlyphs;
 	long hHeap = OS.GetProcessHeap();
 	long lpDx = result.lpDx = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, nGlyphs * 4);
-	long lpGlyphs = result.lpGlyphs = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, nGlyphs * 2);
+	long lpGlyphs =  result.lpGlyphs = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, nGlyphs * 2);
 	long lpOrder = 0;
 	int dwFlags = OS.GCP_GLYPHSHAPE | OS.GCP_REORDER | OS.GCP_LIGATE;
 	if (drawMnemonic) {

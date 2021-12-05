@@ -109,16 +109,19 @@ public final class TextLayout extends Resource {
 		/*Script cache and analysis */
 		SCRIPT_ANALYSIS analysis;
 		long psc = 0;
+		boolean pscIsPointerArithmetic;
 
 		/*Shape info (malloc when the run is shaped) */
-		long glyphs;
+		short[] glyphs;
 		int glyphCount;
-		long clusters;
+		short[] clusters;
 		long visAttrs;
+		boolean visAttrsIsPointerArithmetic;
 
 		/*Place info (malloc when the run is placed) */
-		long advances;
+		int[] advances;
 		long goffsets;
+		boolean goffsetsIsPointerArithmetic;
 		int width;
 		int ascentInPoints;
 		int descentInPoints;
@@ -128,52 +131,63 @@ public final class TextLayout extends Resource {
 		int strikeoutPos, strikeoutThickness;
 
 		/* Justify info (malloc during computeRuns) */
-		long justify;
+		int[] justify;
 
 		/* ScriptBreak */
 		int pslaAllocSize;
 		long psla;
+		boolean pslaIsPointerArithmetic;
 
 		long fallbackFont;
+		boolean fallbackFontIsPointerArithmetic;
 
 	void free() {
 		long hHeap = OS.GetProcessHeap();
 		if (psc != 0) {
-			OS.ScriptFreeCache (psc);
-			OS.HeapFree(hHeap, 0, psc);
+			if (!pscIsPointerArithmetic) {
+				OS.ScriptFreeCache (psc);
+				OS.HeapFree(hHeap, 0, psc);
+			}
+			pscIsPointerArithmetic = false;
 			psc = 0;
 		}
-		if (glyphs != 0) {
-			OS.HeapFree(hHeap, 0, glyphs);
-			glyphs = 0;
+		if (glyphs != null) {
+			glyphs = null;
 			glyphCount = 0;
 		}
-		if (clusters != 0) {
-			OS.HeapFree(hHeap, 0, clusters);
-			clusters = 0;
-		}
 		if (visAttrs != 0) {
-			OS.HeapFree(hHeap, 0, visAttrs);
+			if (!visAttrsIsPointerArithmetic) {
+				OS.HeapFree(hHeap, 0, visAttrs);
+			}
+			visAttrsIsPointerArithmetic = false;
 			visAttrs = 0;
 		}
-		if (advances != 0) {
-			OS.HeapFree(hHeap, 0, advances);
-			advances = 0;
+		if (advances != null) {
+			advances = null;
 		}
 		if (goffsets != 0) {
-			OS.HeapFree(hHeap, 0, goffsets);
+			if (!goffsetsIsPointerArithmetic) {
+				OS.HeapFree(hHeap, 0, goffsets);
+			}
+			goffsetsIsPointerArithmetic = false;
 			goffsets = 0;
 		}
-		if (justify != 0) {
-			OS.HeapFree(hHeap, 0, justify);
-			justify = 0;
+		if (justify != null) {
+			justify = null;
 		}
 		if (psla != 0) {
-			OS.HeapFree(hHeap, 0, psla);
+			if (!pslaIsPointerArithmetic) {
+				OS.HeapFree(hHeap, 0, psla);
+			}
+			pslaIsPointerArithmetic = false;
 			psla = 0;
+			pslaAllocSize = 0;
 		}
 		if (fallbackFont != 0) {
-			OS.DeleteObject(fallbackFont);
+			if (!fallbackFontIsPointerArithmetic) {
+				OS.DeleteObject(fallbackFont);
+			}
+			fallbackFontIsPointerArithmetic = false;
 			fallbackFont = 0;
 		}
 		width = ascentInPoints = descentInPoints = x = 0;
@@ -316,44 +330,27 @@ void computeRuns (GC gc) {
 		}
 		if (wrapWidth != -1 && lineWidth + run.width > wrapWidth && !run.tab && !run.lineBreak) {
 			int start = 0;
-			int[] piDx = new int[run.length];
-			if (run.style != null && run.style.metrics != null) {
-				piDx[0] = run.width;
-			} else {
-				OS.ScriptGetLogicalWidths(run.analysis, run.length, run.glyphCount, run.advances, run.clusters, run.visAttrs, piDx);
-			}
 			int width = 0, maxWidth = wrapWidth - lineWidth;
-			while (width + piDx[start] < maxWidth) {
-				width += piDx[start++];
+			if (run.style != null && run.style.metrics != null) {
+				width += run.width;
+				start++;
+			} else {
+				int glyphStart = 0;
+				while (width + run.advances[glyphStart] < maxWidth) {
+					width += run.advances[glyphStart++];
+				}
+				for (int k = 0; k < run.clusters.length; k++) {
+					if (run.clusters[k] >= glyphStart) {
+						start = k;
+						break;
+					}
+				}
 			}
 			int firstStart = start;
 			int firstIndice = i;
 			while (i >= lineStart) {
-				breakRun(run);
-				while (start >= 0) {
-					OS.MoveMemory(logAttr, run.psla + (start * SCRIPT_LOGATTR.sizeof), SCRIPT_LOGATTR.sizeof);
-					if (logAttr.fSoftBreak || logAttr.fWhiteSpace) break;
-					start--;
-				}
-
-				/*
-				*  Bug in Windows. For some reason Uniscribe sets the fSoftBreak flag for the first letter
-				*  after a letter with an accent. This cause a break line to be set in the middle of a word.
-				*  The fix is to detect the case and ignore fSoftBreak forcing the algorithm keep searching.
-				*/
-				if (start == 0 && i != lineStart && !run.tab) {
-					if (logAttr.fSoftBreak && !logAttr.fWhiteSpace) {
-						OS.MoveMemory(properties, device.scripts[run.analysis.eScript], SCRIPT_PROPERTIES.sizeof);
-						int langID = properties.langid;
-						StyleItem pRun = allRuns[i - 1];
-						OS.MoveMemory(properties, device.scripts[pRun.analysis.eScript], SCRIPT_PROPERTIES.sizeof);
-						if (properties.langid == langID || langID == OS.LANG_NEUTRAL || properties.langid == OS.LANG_NEUTRAL) {
-							breakRun(pRun);
-							OS.MoveMemory(logAttr, pRun.psla + ((pRun.length - 1) * SCRIPT_LOGATTR.sizeof), SCRIPT_LOGATTR.sizeof);
-							if (!logAttr.fWhiteSpace) start = -1;
-						}
-					}
-				}
+				start = findNewStart(logAttr, run, start);
+				start = findNewStartWindowsBug(logAttr, properties, lineStart, i, run, start);
 				if (start >= 0 || i == lineStart) break;
 				run = allRuns[--i];
 				start = run.length - 1;
@@ -383,26 +380,9 @@ void computeRuns (GC gc) {
 					start = Math.max(1, firstStart);
 				}
 			}
-			breakRun(run);
-			while (start < run.length) {
-				OS.MoveMemory(logAttr, run.psla + (start * SCRIPT_LOGATTR.sizeof), SCRIPT_LOGATTR.sizeof);
-				if (!logAttr.fWhiteSpace) break;
-				start++;
-			}
+			start = findAnotherNewStart(logAttr, run, start);
 			if (0 < start && start < run.length) {
-				StyleItem newRun = new StyleItem();
-				newRun.start = run.start + start;
-				newRun.length = run.length - start;
-				newRun.style = run.style;
-				newRun.analysis = cloneScriptAnalysis(run.analysis);
-				run.free();
-				run.length = start;
-				OS.SelectObject(srcHdc, getItemFont(run));
-				run.analysis.fNoGlyphIndex = false;
-				shape (srcHdc, run);
-				OS.SelectObject(srcHdc, getItemFont(newRun));
-				newRun.analysis.fNoGlyphIndex = false;
-				shape (srcHdc, newRun);
+				StyleItem newRun = splitRun(srcHdc, run, start);
 				StyleItem[] newAllRuns = new StyleItem[allRuns.length + 1];
 				System.arraycopy(allRuns, 0, newAllRuns, 0, i + 1);
 				System.arraycopy(allRuns, i + 1, newAllRuns, i + 2, allRuns.length - i - 1);
@@ -420,6 +400,60 @@ void computeRuns (GC gc) {
 			lineCount++;
 		}
 	}
+	computeRunsPart2(srcHdc, lineCount);
+	if (srcHdc != 0) OS.DeleteDC(srcHdc);
+	if (gc == null) device.internal_dispose_GC(hDC, null);
+}
+
+private int findAnotherNewStart(SCRIPT_LOGATTR logAttr, StyleItem run, int start) {
+	breakRun(run);
+	while (start < run.length) {
+		OS.MoveMemory(logAttr, run.psla + (start * SCRIPT_LOGATTR.sizeof), SCRIPT_LOGATTR.sizeof);
+		if (!logAttr.fWhiteSpace) break;
+		start++;
+	}
+	return start;
+}
+
+private int findNewStartWindowsBug(SCRIPT_LOGATTR logAttr, SCRIPT_PROPERTIES properties, int lineStart, int i, StyleItem run,
+		int start) {
+	/*
+	*  Bug in Windows. For some reason Uniscribe sets the fSoftBreak flag for the first letter
+	*  after a letter with an accent. This cause a break line to be set in the middle of a word.
+	*  The fix is to detect the case and ignore fSoftBreak forcing the algorithm keep searching.
+	*/
+	if (start == 0 && i != lineStart && !run.tab) {
+		if (logAttr.fSoftBreak && !logAttr.fWhiteSpace) {
+			OS.MoveMemory(properties, device.scripts[run.analysis.eScript], SCRIPT_PROPERTIES.sizeof);
+			int langID = properties.langid;
+			StyleItem pRun = allRuns[i - 1];
+			OS.MoveMemory(properties, device.scripts[pRun.analysis.eScript], SCRIPT_PROPERTIES.sizeof);
+			if (properties.langid == langID || langID == OS.LANG_NEUTRAL || properties.langid == OS.LANG_NEUTRAL) {
+				breakRun(pRun);
+				OS.MoveMemory(logAttr, pRun.psla + ((pRun.length - 1) * SCRIPT_LOGATTR.sizeof), SCRIPT_LOGATTR.sizeof);
+				if (!logAttr.fWhiteSpace) start = -1;
+			}
+		}
+	}
+	return start;
+}
+
+private int findNewStart(SCRIPT_LOGATTR logAttr, StyleItem run, int start) {
+	breakRun(run);
+	while (start >= 0) {
+		OS.MoveMemory(logAttr, run.psla + (start * SCRIPT_LOGATTR.sizeof), SCRIPT_LOGATTR.sizeof);
+		if (logAttr.fSoftBreak || logAttr.fWhiteSpace) break;
+		start--;
+	}
+	return start;
+}
+
+private void ScriptGetLogicalWidths(StyleItem run, int[] piDx) {
+	OS.ScriptGetLogicalWidths(run.analysis, run.length, run.glyphCount, run.advances, run.clusters, run.visAttrs, piDx);
+}
+
+private void computeRunsPart2(long srcHdc, int lineCount) {
+	int lineWidth;
 	lineWidth = 0;
 	runs = new StyleItem[lineCount][];
 	lineOffset = new int[lineCount + 1];
@@ -466,8 +500,7 @@ void computeRuns (GC gc) {
 				for (StyleItem item : runs[line]) {
 					int iDx = item.width * wrapWidth / lineWidth;
 					if (iDx != item.width) {
-						item.justify = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, item.glyphCount * 4);
-						if (item.justify == 0) SWT.error(SWT.ERROR_NO_HANDLES);
+						item.justify = new int[item.glyphCount];
 						OS.ScriptJustify(item.visAttrs, item.advances, item.glyphCount, iDx - item.width, 2, item.justify);
 						item.width = iDx;
 					}
@@ -499,8 +532,125 @@ void computeRuns (GC gc) {
 			descentInPoints = Math.max(0, DPIUtil.autoScaleDown(getDevice(), this.descentInPixels));
 		}
 	}
-	if (srcHdc != 0) OS.DeleteDC(srcHdc);
-	if (gc == null) device.internal_dispose_GC(hDC, null);
+}
+
+private StyleItem splitRunOld(long srcHdc, StyleItem run, int start) {
+	System.out.println("BEFORE: start: " + start);
+	System.out.println(Arrays.toString(run.glyphs));
+	System.out.println(Arrays.toString(run.clusters));
+	System.out.println(Arrays.toString(run.advances));
+
+	StyleItem newRun = new StyleItem();
+	newRun.start = run.start + start;
+	newRun.length = run.length - start;
+	newRun.style = run.style;
+	newRun.analysis = cloneScriptAnalysis(run.analysis);
+	run.free();
+	run.length = start;
+	OS.SelectObject(srcHdc, getItemFont(run));
+	run.analysis.fNoGlyphIndex = false;
+	shape (srcHdc, run);
+	OS.SelectObject(srcHdc, getItemFont(newRun));
+	newRun.analysis.fNoGlyphIndex = false;
+	shape (srcHdc, newRun);
+
+	System.out.println("AFTER run");
+	System.out.println(Arrays.toString(run.glyphs));
+	System.out.println(Arrays.toString(run.clusters));
+	System.out.println(Arrays.toString(run.advances));
+
+	System.out.println("AFTER newRun");
+	System.out.println(Arrays.toString(newRun.glyphs));
+	System.out.println(Arrays.toString(newRun.clusters));
+	System.out.println(Arrays.toString(newRun.advances));
+
+	return newRun;
+}
+
+private StyleItem splitRun(long srcHdc, StyleItem run, int start) {
+	StyleItem newRun = new StyleItem();
+	newRun.start = run.start + start;
+	newRun.length = run.length - start;
+	newRun.style = run.style;
+	newRun.analysis = cloneScriptAnalysis(run.analysis);
+	newRun.fallbackFont = run.fallbackFont;
+	newRun.fallbackFontIsPointerArithmetic = true;
+
+	boolean trace = false;
+	if (trace) {
+		System.out.println("BEFORE: start: " + start);
+		System.out.println(Arrays.toString(run.glyphs));
+		System.out.println(Arrays.toString(run.clusters));
+		System.out.println(Arrays.toString(run.advances));
+	}
+	int startGlyph = run.clusters[start];
+	newRun.glyphCount = run.glyphCount - startGlyph;
+	newRun.glyphs = Arrays.copyOfRange(run.glyphs, startGlyph, startGlyph + newRun.glyphCount);
+	newRun.clusters = Arrays.copyOfRange(run.clusters, start, start + newRun.length);
+	for (int i = 0; i < newRun.clusters.length; i++) {
+		newRun.clusters[i] -= startGlyph;
+	}
+	newRun.advances = Arrays.copyOfRange(run.advances, startGlyph, startGlyph + newRun.glyphCount);
+
+	newRun.visAttrsIsPointerArithmetic = true;
+	newRun.visAttrs = run.visAttrs + (startGlyph * SCRIPT_VISATTR_SIZEOF);
+	newRun.goffsetsIsPointerArithmetic = true;
+	newRun.goffsets = run.goffsets + (startGlyph * GOFFSET_SIZEOF);
+	newRun.pslaIsPointerArithmetic = true;
+	newRun.pslaAllocSize = newRun.length * SCRIPT_LOGATTR.sizeof;
+	newRun.psla = run.psla + (start * SCRIPT_LOGATTR.sizeof);
+	// we can share script cache because newRun is same style as run
+	newRun.pscIsPointerArithmetic = true;
+	newRun.psc = run.psc;
+
+	run.glyphCount = startGlyph;
+	run.glyphs = Arrays.copyOf(run.glyphs, startGlyph);
+	run.clusters = Arrays.copyOf(run.clusters, start);
+	run.advances = Arrays.copyOf(run.advances, startGlyph);
+	// run.visAttrs, run.goffsets, run.psla are used as is - the arrays are too long
+	// which means some extra memory is
+	// allocated.
+
+	if (trace) {
+		System.out.println("AFTER run");
+		System.out.println(Arrays.toString(run.glyphs));
+		System.out.println(Arrays.toString(run.clusters));
+		System.out.println(Arrays.toString(run.advances));
+
+		System.out.println("AFTER newRun");
+		System.out.println(Arrays.toString(newRun.glyphs));
+		System.out.println(Arrays.toString(newRun.clusters));
+		System.out.println(Arrays.toString(newRun.advances));
+	}
+
+	run.length = start;
+	run.width = 0;
+	OS.SelectObject(srcHdc, getItemFont(run));
+	calculateMetrics(srcHdc, run);
+	OS.SelectObject(srcHdc, getItemFont(newRun));
+	calculateMetrics(srcHdc, newRun);
+
+//	run.glyphs = null;
+//	newRun.glyphs = null;
+//	shape (srcHdc, run);
+//	shape (srcHdc, newRun);
+	if (trace) {
+		System.out.println("Recalc newRun");
+		System.out.println(Arrays.toString(newRun.glyphs));
+		System.out.println(Arrays.toString(newRun.clusters));
+		System.out.println(Arrays.toString(newRun.advances));
+		System.out.println("C side:");
+		printMemory(newRun.visAttrs, newRun.glyphCount * SCRIPT_VISATTR_SIZEOF);
+		printMemory(newRun.goffsets, newRun.glyphCount * GOFFSET_SIZEOF);
+		printMemory(newRun.psla, newRun.pslaAllocSize);
+	}
+	return newRun;
+}
+
+private void printMemory(long addr, int length) {
+	byte[] visAttrs = new byte[length];
+	C.memmove(visAttrs, addr, visAttrs.length);
+	System.out.println(Arrays.toString(visAttrs));
 }
 
 @Override
@@ -1123,7 +1273,7 @@ RECT drawRunTextGDIP(long graphics, StyleItem run, RECT rect, long gdipFont, int
 	}
 	int[] advances = new int[run.glyphCount];
 	float[] points = new float[run.glyphCount * 2];
-	C.memmove(advances, run.justify != 0 ? run.justify : run.advances, run.glyphCount * 4);
+	advances = run.justify != null ? run.justify : run.advances;
 	int glyphX = drawX;
 	for (int h = 0, j = 0; h < advances.length; h++) {
 		points[j++] = glyphX;
@@ -2138,7 +2288,7 @@ Point getLocationInPixels (int offset, boolean trailing) {
  */
 private int ScriptCPtoX(int characterPosition, boolean trailing, StyleItem run) {
 	int[] piX = new int[1];
-	long advances = run.justify != 0 ? run.justify : run.advances;
+	int[] advances = run.justify != null ? run.justify : run.advances;
 	OS.ScriptCPtoX(characterPosition, trailing, run.length, run.glyphCount, run.clusters, run.visAttrs, advances,
 			run.analysis, piX);
 	return piX[0];
@@ -2351,7 +2501,7 @@ int getOffsetInPixels (int x, int y, int[] trailing) {
 			if ((orientation & SWT.RIGHT_TO_LEFT) != 0) {
 				xRun = run.width - xRun;
 			}
-			long advances = run.justify != 0 ? run.justify : run.advances;
+			int[] advances = run.justify != null ? run.justify : run.advances;
 			OS.ScriptXtoCP(xRun, cChars, cGlyphs, run.clusters, run.visAttrs, advances, run.analysis, piCP, piTrailing);
 			int offset = run.start + piCP[0];
 			int length = segmentsText.length();
@@ -3536,13 +3686,11 @@ boolean shape (long hdc, StyleItem run, char[] chars, int[] glyphCount, int maxG
 		SCRIPT_FONTPROPERTIES fp = new SCRIPT_FONTPROPERTIES ();
 		fp.cBytes = SCRIPT_FONTPROPERTIES.sizeof;
 		OS.ScriptGetFontProperties(hdc, run.psc, fp);
-		short[] glyphs = new short[glyphCount[0]];
-		OS.MoveMemory(glyphs, run.glyphs, glyphs.length * 2);
 		int i;
-		for (i = 0; i < glyphs.length; i++) {
-			if (glyphs[i] == fp.wgDefault) break;
+		for (i = 0; i < glyphCount[0]; i++) {
+			if (run.glyphs[i] == fp.wgDefault) break;
 		}
-		if (i == glyphs.length) return true;
+		if (i == glyphCount[0]) return true;
 	}
 	if (run.psc != 0) {
 		OS.ScriptFreeCache(run.psc);
@@ -3588,17 +3736,15 @@ long createMetafileWithChars(long hdc, long hFont, char[] chars, int charCount) 
  */
 void shape (final long hdc, final StyleItem run) {
 	if (run.lineBreak) return;
-	if (run.glyphs != 0) return;
+	if (run.glyphs != null) return;
 	final int[] buffer = new int[1];
 	final char[] chars = new char[run.length];
 	segmentsText.getChars(run.start, run.start + run.length, chars, 0);
 
 	final int maxGlyphs = (chars.length * 3 / 2) + 16;
 	long hHeap = OS.GetProcessHeap();
-	run.glyphs = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, maxGlyphs * 2);
-	if (run.glyphs == 0) SWT.error(SWT.ERROR_NO_HANDLES);
-	run.clusters = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, maxGlyphs * 2);
-	if (run.clusters == 0) SWT.error(SWT.ERROR_NO_HANDLES);
+	run.glyphs = new short[maxGlyphs*2];
+	run.clusters = new short[maxGlyphs*2];
 	run.visAttrs = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, maxGlyphs * SCRIPT_VISATTR_SIZEOF);
 	if (run.visAttrs == 0) SWT.error(SWT.ERROR_NO_HANDLES);
 	run.psc = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, C.PTR_SIZEOF);
@@ -3744,13 +3890,25 @@ void shape (final long hdc, final StyleItem run) {
 		OS.ScriptShape(hdc, run.psc, chars, chars.length, maxGlyphs, run.analysis, run.glyphs, run.clusters, run.visAttrs, buffer);
 		run.glyphCount = buffer[0];
 	}
+	ScriptPlace(hdc, run, hHeap);
+}
+
+private void ScriptPlace(final long hdc, final StyleItem run, long hHeap) {
 	int[] abc = new int[3];
-	run.advances = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, run.glyphCount * 4);
-	if (run.advances == 0) SWT.error(SWT.ERROR_NO_HANDLES);
+	run.advances = new int[run.glyphCount];
 	run.goffsets = OS.HeapAlloc(hHeap, OS.HEAP_ZERO_MEMORY, run.glyphCount * GOFFSET_SIZEOF);
 	if (run.goffsets == 0) SWT.error(SWT.ERROR_NO_HANDLES);
 	OS.ScriptPlace(hdc, run.psc, run.glyphs, run.glyphCount, run.visAttrs, run.analysis, run.advances, run.goffsets, abc);
 	run.width = abc[0] + abc[1] + abc[2];
+	calculateMetrics(hdc, run);
+}
+
+private void calculateMetrics(final long hdc, final StyleItem run) {
+	if (run.width == 0) {
+		for (int advance : run.advances) {
+			run.width += advance;
+		}
+	}
 	TextStyle style = run.style;
 	if (style != null) {
 		OUTLINETEXTMETRIC lotm = null;
