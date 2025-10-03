@@ -79,6 +79,9 @@ public class Test_org_eclipse_swt_events_KeyEvent extends KeyboardLayoutTest {
 						return true;
 				}
 				break;
+			case PrtScr:
+				// Opens the snipping tool causing loss of focus of the test
+				return true;
 			case _0:
 				if (state == __CS) {
 					// Windows bug. Ctrl+Shift+0 is assigned to switch to Japanese layout,
