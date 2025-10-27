@@ -1081,7 +1081,6 @@ public void test_imageDataIsCached() {
 
 @Test
 public void test_imageDataSameViaDifferentProviders() {
-	assumeFalse(SwtTestUtil.isCocoa, "Cocoa generates inconsistent image data");
 	String imagePath = getPath("collapseall.png");
 	ImageFileNameProvider imageFileNameProvider = zoom -> {
 		return (zoom == 100) ? imagePath : null;
@@ -1107,7 +1106,6 @@ public void test_imageDataSameViaDifferentProviders() {
 
 @Test
 public void test_imageDataSameViaProviderAndSimpleData() {
-	assumeFalse(SwtTestUtil.isCocoa, "Cocoa generates inconsistent image data");
 	String imagePath = getPath("collapseall.png");
 	ImageFileNameProvider imageFileNameProvider = __ -> {
 		return imagePath;
