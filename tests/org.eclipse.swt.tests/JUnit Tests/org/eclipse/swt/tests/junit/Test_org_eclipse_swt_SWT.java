@@ -30,12 +30,14 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
 /**
  * Automated Test Suite for class {@link org.eclipse.swt.SWT}.
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_SWT {
 
 	@Test

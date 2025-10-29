@@ -35,6 +35,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.ImageLoaderEvent;
 import org.eclipse.swt.graphics.ImageLoaderListener;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.Test;
 
@@ -43,6 +44,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.ImageLoader
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_graphics_ImageLoader {
 
 @Test

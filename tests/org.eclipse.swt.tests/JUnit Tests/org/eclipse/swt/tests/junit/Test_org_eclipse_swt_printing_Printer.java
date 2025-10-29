@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.printing.Printer;
 import org.eclipse.swt.printing.PrinterData;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.printing.Printer
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_printing_Printer {
 
 @Test

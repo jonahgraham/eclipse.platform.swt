@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.program.Program;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.program.Program
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_program_Program {
 
 @BeforeAll

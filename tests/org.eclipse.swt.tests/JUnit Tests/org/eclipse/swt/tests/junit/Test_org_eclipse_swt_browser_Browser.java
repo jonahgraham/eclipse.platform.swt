@@ -77,6 +77,7 @@ import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
@@ -96,6 +97,7 @@ import org.junit.jupiter.api.io.TempDir;
  *
  * @see org.eclipse.swt.browser.Browser
  */
+@WithTestLifecycle
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class Test_org_eclipse_swt_browser_Browser extends Test_org_eclipse_swt_widgets_Composite {
 	// TODO Reduce to reasonable value

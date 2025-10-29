@@ -23,6 +23,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageDataProvider;
 import org.eclipse.swt.graphics.ImageFileNameProvider;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.io.TempDir;
  * JUnit plug-in test in order to have the SVGRasterizer fragment on the
  * classpath.
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_internal_SVGRasterizer {
 
 	@TempDir

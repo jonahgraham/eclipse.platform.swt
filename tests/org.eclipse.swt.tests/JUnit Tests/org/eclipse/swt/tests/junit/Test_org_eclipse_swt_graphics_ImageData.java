@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.tests.graphics.ImageDataTestHelper;
 import org.eclipse.swt.tests.graphics.ImageDataTestHelper.BlitTestInfo;
 import org.eclipse.swt.widgets.Display;
@@ -47,6 +48,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.ImageData
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_graphics_ImageData {
 	static int[] indexedDepths = {1, 2, 4, 8, 16};
 	static int[] directDepths  = {8, 16, 24, 32};

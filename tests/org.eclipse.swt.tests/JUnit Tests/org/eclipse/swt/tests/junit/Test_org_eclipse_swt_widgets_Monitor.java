@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Monitor;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.widgets.Monitor
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_widgets_Monitor {
 
 @BeforeEach

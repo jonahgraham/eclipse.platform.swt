@@ -27,6 +27,7 @@ import java.util.Optional;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -47,6 +48,7 @@ import org.opentest4j.IncompleteExecutionException;
  *
  * @see org.eclipse.swt.widgets.Widget
  */
+@WithTestLifecycle
 abstract class Test_org_eclipse_swt_widgets_Widget{
 	protected Shell shell;
 	private Widget widget;

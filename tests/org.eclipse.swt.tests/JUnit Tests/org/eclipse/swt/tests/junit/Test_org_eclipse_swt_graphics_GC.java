@@ -48,6 +48,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.internal.DPIUtil;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -65,6 +66,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @see org.eclipse.swt.graphics.GC
  */
 @SuppressWarnings("restriction")
+@WithTestLifecycle
 public class Test_org_eclipse_swt_graphics_GC {
 
 @BeforeEach

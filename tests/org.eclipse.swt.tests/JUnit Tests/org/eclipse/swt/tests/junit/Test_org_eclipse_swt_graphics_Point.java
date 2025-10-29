@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.Point
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_graphics_Point{
 
 @Test

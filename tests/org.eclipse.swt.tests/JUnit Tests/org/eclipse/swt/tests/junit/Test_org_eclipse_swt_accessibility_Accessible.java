@@ -25,6 +25,7 @@ import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.accessibility.AccessibleListener;
 import org.eclipse.swt.accessibility.AccessibleTextEvent;
 import org.eclipse.swt.accessibility.AccessibleTextListener;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.accessibility.Accessible
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_accessibility_Accessible {
 
 @BeforeEach

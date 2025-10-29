@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.swt.events.TypedEvent;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.AfterEach;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.events.TypedEvent
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_events_TypedEvent {
 
 @BeforeEach

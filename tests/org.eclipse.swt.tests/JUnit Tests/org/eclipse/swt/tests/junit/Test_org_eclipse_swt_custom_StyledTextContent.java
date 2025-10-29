@@ -23,6 +23,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.custom.TextChangeListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.custom.StyledTextContent
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_custom_StyledTextContent {
 	private static final String INITIAL_TEXT = "initial text";
 

@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.RGB
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_graphics_RGB {
 
 	@Test

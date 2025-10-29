@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.Font
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_graphics_Font {
 
 Display display;

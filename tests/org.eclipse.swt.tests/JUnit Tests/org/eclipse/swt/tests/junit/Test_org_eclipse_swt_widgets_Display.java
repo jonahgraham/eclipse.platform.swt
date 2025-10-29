@@ -37,6 +37,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -56,6 +57,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
  *
  * @see org.eclipse.swt.widgets.Display
  */
+@WithTestLifecycle
 public class Test_org_eclipse_swt_widgets_Display {
 
 private static boolean isRunningOnEclipseOrgHudson =

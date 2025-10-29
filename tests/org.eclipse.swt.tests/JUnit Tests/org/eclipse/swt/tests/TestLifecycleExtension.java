@@ -1,27 +1,52 @@
 package org.eclipse.swt.tests;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class TestLifecycleExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
+public class TestLifecycleExtension
+		implements BeforeAllCallback, AfterAllCallback, BeforeTestExecutionCallback, AfterTestExecutionCallback {
 
-    @Override
-    public void beforeTestExecution(ExtensionContext context) {
+	@Override
+	public void beforeAll(ExtensionContext context) {
 		System.out.println("=============================================================");
-        System.out.println(">>> Starting test: " + context.getDisplayName());
+		System.out.println(">>> Starting all: " + context.getTestClass().map(Class::getName).orElse("UnknownClass"));
 		report();
 		System.out.println("--------------------------------------------------------------");
-    }
-    @Override
-    public void afterTestExecution(ExtensionContext context) {
+	}
+
+	@Override
+	public void afterAll(ExtensionContext context) {
 		System.out.println("--------------------------------------------------------------");
-        System.out.println("<<< Finished test: " + context.getDisplayName());
+		System.out.println("<<< Finished all: " + context.getTestClass().map(Class::getName).orElse("UnknownClass"));
 		report();
 		System.out.println("=============================================================");
-    }
+
+	}
+
+	@Override
+	public void beforeTestExecution(ExtensionContext context) {
+		System.out.println("=============================================================");
+		System.out.println(">>> Starting test: " + context.getTestClass().map(Class::getName).orElse("UnknownClass")
+				+ "." + context.getDisplayName());
+		report();
+		System.out.println("--------------------------------------------------------------");
+		throw new RuntimeException("FAILED HERE");
+	}
+
+	@Override
+	public void afterTestExecution(ExtensionContext context) {
+		System.out.println("--------------------------------------------------------------");
+		System.out.println("<<< Finished test: " + context.getTestClass().map(Class::getName).orElse("UnknownClass")
+				+ "." + context.getDisplayName());
+		report();
+		System.out.println("=============================================================");
+	}
 
 	private void report() {
 		try {

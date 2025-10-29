@@ -24,9 +24,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.svg.JSVGRasterizer;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("restriction")
+@WithTestLifecycle
 class JSVGRasterizerTest {
 
 	private final JSVGRasterizer rasterizer = new JSVGRasterizer();

@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.AfterEach;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.widgets.Dialog
  */
+@WithTestLifecycle
 public abstract class Test_org_eclipse_swt_widgets_Dialog {
 
 @BeforeEach

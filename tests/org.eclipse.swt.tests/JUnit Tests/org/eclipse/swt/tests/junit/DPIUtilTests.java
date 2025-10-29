@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.eclipse.swt.internal.DPIUtil;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
  */
 @SuppressWarnings("restriction")
 @DisabledOnOs(value = org.junit.jupiter.api.condition.OS.LINUX, disabledReason = "Linux uses Cairo auto scaling, thus DPIUtil scaling is disabled")
+@WithTestLifecycle
 public class DPIUtilTests {
 
 	public void scaleDownInteger() {
