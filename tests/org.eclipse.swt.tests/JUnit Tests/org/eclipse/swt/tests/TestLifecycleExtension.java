@@ -43,7 +43,6 @@ public class TestLifecycleExtension
 				+ "." + context.getDisplayName());
 		report();
 		System.out.println("--------------------------------------------------------------");
-		throw new RuntimeException("FAILED HERE");
 	}
 
 	@Override
