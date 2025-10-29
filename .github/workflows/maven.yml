@@ -8,7 +8,7 @@ concurrency:
 
 on:
   push:
-    branches: [ master, temp ]
+    branches: [ master, temp, temp2 ]
   pull_request:
     branches: [ master ]
     types: [opened, reopened, synchronize, labeled]
