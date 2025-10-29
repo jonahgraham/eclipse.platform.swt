@@ -13,9 +13,6 @@ on:
     branches: [ master ]
     types: [opened, reopened, synchronize, labeled]
 
-env:
-  SWT_GTK4: "${{ contains(github.event.pull_request.labels.*.name, 'gtk4') && '1' || '0' }}"
-
 jobs:
   event_file:
     name: "Event File"
@@ -32,10 +29,11 @@ jobs:
       matrix:
         java: [ '21' ]
         config: 
-          - { name: Linux, os: ubuntu-latest, native: gtk.linux.x86_64 }
-          # - { name: Windows, os: windows-latest, native: win32.win32.x86_64 }
-          # - { name: MacOS x86, os: macos-13, native: cocoa.macosx.x86_64 }
-          # - { name: MacOS ARM, os: macos-latest, native: cocoa.macosx.aarch64 }
+          - { name: Linux GTK3, os: ubuntu-latest, native: gtk.linux.x86_64 }
+          - { name: Linux GTK4, os: ubuntu-latest, native: gtk.linux.x86_64, gtk4: true }
+          - { name: Windows, os: windows-latest, native: win32.win32.x86_64 }
+          - { name: MacOS x86, os: macos-13, native: cocoa.macosx.x86_64 }
+          - { name: MacOS ARM, os: macos-latest, native: cocoa.macosx.aarch64 }
     name: Verify ${{ matrix.config.name }} with Java-${{ matrix.java }}
     runs-on: ${{ matrix.config.os }}
     steps:
@@ -48,7 +46,10 @@ jobs:
       if: ${{ matrix.config.native == 'gtk.linux.x86_64'}}
       run: |
         sudo apt-get update -qq 
-        sudo apt-get install -qq -y libgtk-3-dev libgtk-4-dev freeglut3-dev webkit2gtk-driver  libwebkitgtk-6.0-4
+        sudo apt-get install -qq -y libgtk-3-dev libgtk-4-dev freeglut3-dev webkit2gtk-driver libwebkitgtk-6.0-4
+    - name: Disable AppArmor when testing WebKit on GTK4
+      if: ${{ matrix.config.gtk4 }}
+      run: |
         # WebKit for GTK4 uses bwrap and on Ubuntu 24.04 default settings are not working
         # so turn off apparmor. We are already running in a protected environment, so we
         # don't really need this extra level.
@@ -71,6 +72,7 @@ jobs:
     - name: Build
       env:
         GTK_XCFLAGS: '-Wno-deprecated-declarations'
+        SWT_GTK4: "${{ matrix.config.gtk4 && '1' || '0' }}"
       run: >-
         ${{ contains(matrix.config.native, 'linux') && 'xvfb-run' || '' }}
         mvn --batch-mode -V -U -e
@@ -82,10 +84,12 @@ jobs:
         --fail-at-end
         -DskipNativeTests=false
         -DfailIfNoTests=false
-        ${{ contains(matrix.config.native, 'linux') && '-DexcludedGroups=gtk4-todo' || '' }}
+        ${{ matrix.config.gtk4 && '-DexcludedGroups=gtk4-todo' || '' }}
         clean install
     - name: Performance tests
       if: contains(github.event.pull_request.labels.*.name, 'performance')
+      env:
+        SWT_GTK4: "${{ matrix.config.gtk4 && '1' || '0' }}"
       working-directory: tests/org.eclipse.swt.tests
       run: >-
         ${{ contains(matrix.config.native, 'linux') && 'xvfb-run' || '' }}
