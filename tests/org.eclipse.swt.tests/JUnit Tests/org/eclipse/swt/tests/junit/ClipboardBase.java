@@ -21,6 +21,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.tests.WithTestLifecycle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -36,6 +37,7 @@ import clipboard.ClipboardTest;
 /**
  * Base class for tests that test clipboard and transfer types
  */
+@WithTestLifecycle
 public class ClipboardBase {
 
 	/**
