@@ -11,7 +11,9 @@
 package org.eclipse.swt.tests.junit;
 
 import org.eclipse.swt.SWT;
+import org.junit.jupiter.api.Tag;
 
+@Tag("gtk4-todo")
 public class Test_org_eclipse_swt_widgets_DateTime_Style_TIME extends Test_org_eclipse_swt_widgets_DateTime {
 
 	public Test_org_eclipse_swt_widgets_DateTime_Style_TIME() {
