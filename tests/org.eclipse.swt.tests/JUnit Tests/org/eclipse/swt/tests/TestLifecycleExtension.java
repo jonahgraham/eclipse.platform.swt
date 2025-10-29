@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.swt.tests.junit.SwtTestUtil;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -58,13 +57,17 @@ public class TestLifecycleExtension
 
 	private void report() {
 		try {
-			new ProcessBuilder("free", "-mh").inheritIO().start().waitFor(1, TimeUnit.SECONDS);
-		} catch (InterruptedException | IOException e1) {
+			System.out.println("free -mh");
+			Process free = new ProcessBuilder("free", "-mh").inheritIO().start();
+			printProcessOutput(free);
+		} catch (IOException e1) {
 			System.out.println("Exception while trying to get free memory info");
 		}
 		try {
-			new ProcessBuilder("ps", "aux").inheritIO().start().waitFor(1, TimeUnit.SECONDS);
-		} catch (InterruptedException | IOException e) {
+			System.out.println("ps aux");
+			Process free = new ProcessBuilder("ps", "aux").inheritIO().start();
+			printProcessOutput(free);
+		} catch (IOException e) {
 			System.out.println("Exception while trying to get ps aux info");
 		}
 		long totalMemory = Runtime.getRuntime().totalMemory(); // Total memory allocated to the JVM
@@ -92,6 +95,16 @@ public class TestLifecycleExtension
 			Collections.sort(paths);
 			System.out.println(" File descriptors == Count" + paths.size());
 			paths.forEach(System.out::println);
+		}
+	}
+
+	private void printProcessOutput(Process process) throws IOException {
+		String result = new String(process.getInputStream().readAllBytes());
+		String err = new String(process.getErrorStream().readAllBytes());
+		System.out.println(result);
+		if (!err.isBlank()) {
+			System.out.println("stderr:");
+			System.out.println(err);
 		}
 	}
 
