@@ -1,8 +1,16 @@
 package org.eclipse.swt.tests;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.swt.tests.junit.SwtTestUtil;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -65,6 +73,42 @@ public class TestLifecycleExtension
 		System.out.println("Total Heap Memory: " + totalMemory / (1024 * 1024) + " MB");
 		System.out.println("Free Heap Memory: " + freeMemory / (1024 * 1024) + " MB");
 		System.out.println("Used Heap Memory: " + usedMemory / (1024 * 1024) + " MB");
+
+		if (SwtTestUtil.isGTK) {
+			List<String> paths = new ArrayList<>();
+			Path fd = Paths.get("/proc/self/fd/");
+			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(fd)) {
+				directoryStream.forEach(path -> {
+					String resolvedPath = resolveSymLink(path);
+					if (isTestRelatedFileDescriptor(resolvedPath)) {
+						paths.add(resolvedPath);
+					}
+				});
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.out.println("Failed to get file descriptor(s)" + paths.size());
+				e.printStackTrace(System.out);
+			}
+			Collections.sort(paths);
+			System.out.println(" File descriptors == Count" + paths.size());
+			paths.forEach(System.out::println);
+		}
 	}
 
+	private static boolean isTestRelatedFileDescriptor(String fileDescriptorPath) {
+		// Do not consider file descriptors of Maven artifacts that are currently opened
+		// by other Maven plugins executed in parallel build (such as parallel
+		// compilation of the swt.tools bundle etc.)
+		return fileDescriptorPath != null && !fileDescriptorPath.contains(".m2") && !fileDescriptorPath.endsWith(".jar")
+				&& !fileDescriptorPath.contains("target/classes");
+	}
+
+	private static String resolveSymLink(Path path) {
+		try {
+			return Files.isSymbolicLink(path) ? Files.readSymbolicLink(path).toString() : path.toString();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }
