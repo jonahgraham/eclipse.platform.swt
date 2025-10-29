@@ -57,14 +57,14 @@ public class TestLifecycleExtension
 	private void report() {
 		try {
 			System.out.println("free -mh");
-			Process free = new ProcessBuilder("free", "-mh").inheritIO().start();
+			Process free = new ProcessBuilder("free", "-mh").start();
 			printProcessOutput(free);
 		} catch (IOException e1) {
 			System.out.println("Exception while trying to get free memory info");
 		}
 		try {
 			System.out.println("ps aux");
-			Process free = new ProcessBuilder("ps", "aux").inheritIO().start();
+			Process free = new ProcessBuilder("ps", "aux").start();
 			printProcessOutput(free);
 		} catch (IOException e) {
 			System.out.println("Exception while trying to get ps aux info");
