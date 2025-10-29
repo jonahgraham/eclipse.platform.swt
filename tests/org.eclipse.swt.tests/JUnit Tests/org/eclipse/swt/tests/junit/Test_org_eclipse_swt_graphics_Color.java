@@ -27,6 +27,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.RGBA;
+import org.eclipse.swt.tests.AllowLeaks;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +41,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.Color
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_graphics_Color {
 
 	@BeforeEach
@@ -47,6 +50,7 @@ public void setUp() {
 }
 
 @Test
+
 public void test_ConstructorLorg_eclipse_swt_graphics_DeviceIII() {
 	// Test new Color(int red, int green, int blue)
 	// IllegalArgumentException if the red, green or blue argument is not between 0 and 255
@@ -400,6 +404,7 @@ public void test_equalsLjava_lang_Object() {
 }
 
 @Test
+@AllowLeaks
 public void test_equalsLjava_lang_Object_with_device() {
 	Color color = new Color(display, 1, 2, 3);
 	Color sameColor = new Color(display, 1, 2, 3);

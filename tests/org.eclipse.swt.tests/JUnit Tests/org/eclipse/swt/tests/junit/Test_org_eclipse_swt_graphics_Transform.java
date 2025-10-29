@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.eclipse.swt.graphics.Transform;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.Transform
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_graphics_Transform {
 	private Display display;
 

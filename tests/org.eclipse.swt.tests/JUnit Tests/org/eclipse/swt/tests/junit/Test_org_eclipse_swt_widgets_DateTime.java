@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.widgets.DateTime
  */
+@CheckForLeaks
 public abstract class Test_org_eclipse_swt_widgets_DateTime extends Test_org_eclipse_swt_widgets_Control {
 	static final int JAN = 0, FEB = 1, AUG = 7, NOV = 10;
 	DateTime datetime;

@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.printing.PrintDialog;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.printing.PrintDialog
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_printing_PrintDialog extends Test_org_eclipse_swt_widgets_Dialog {
 
 @Override

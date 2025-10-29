@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.Rectangle
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_graphics_Rectangle {
 
 @Test

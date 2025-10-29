@@ -22,6 +22,7 @@ import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
@@ -41,6 +42,7 @@ import org.opentest4j.IncompleteExecutionException;
  *
  * @see org.eclipse.swt.custom.StyledText
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_custom_StyledText_multiCaretsSelections {
 
 	Shell shell;

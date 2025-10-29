@@ -43,17 +43,30 @@ public class RemoteClipboard implements ClipboardCommands {
 	private ClipboardCommands remote;
 	private Process remoteClipboardProcess;
 	private Path remoteClipboardTempDir;
+	private Registry registry;
 
 	public void start() throws Exception {
 		assertNull(remote, "Create a new instance to restart");
 
+		/*
+		 * Force RMI to cleanup more quickly. These system properties only take effect
+		 * if they are set before first RMI operation.
+		 *
+		 * Without cleanInterval lots of RMI RenewClean threads stay alive.
+		 *
+		 * Without connectionTimeout the sockets connected to the RMI server stay
+		 * CLOSE_WAIT for a long time.
+		 */
+		System.setProperty("sun.rmi.dgc.cleanInterval", "100");
+		System.setProperty("sun.rmi.transport.connectionTimeout", "100");
+
 		int port = DEBUG_REMOTE ? ClipboardCommands.DEFAULT_PORT : launchRemote();
 		try {
-			Registry reg = LocateRegistry.getRegistry("127.0.0.1", port);
+			registry = LocateRegistry.getRegistry("127.0.0.1", port);
 			long stopTime = System.currentTimeMillis() + 10000;
 			do {
 				try {
-					remote = (ClipboardCommands) reg.lookup(ClipboardCommands.ID);
+					remote = (ClipboardCommands) registry.lookup(ClipboardCommands.ID);
 					break;
 				} catch (NotBoundException e) {
 					// try again because the remote app probably hasn't bound yet
@@ -123,8 +136,8 @@ public class RemoteClipboard implements ClipboardCommands {
 		String javaExe = javaHome + "/bin/java" + (SwtTestUtil.isWindowsOS ? ".exe" : "");
 		assertTrue(Files.exists(Path.of(javaExe)));
 
-		ProcessBuilder pb = new ProcessBuilder(javaExe, "clipboard.ClipboardTest", "-autoport")
-				.directory(remoteClipboardTempDir.toFile());
+		ProcessBuilder pb = new ProcessBuilder(javaExe, "-Dsun.rmi.dgc.leaseValue=100", "clipboard.ClipboardTest",
+				"-autoport").directory(remoteClipboardTempDir.toFile());
 		pb.inheritIO();
 		pb.redirectOutput(Redirect.PIPE);
 		remoteClipboardProcess = pb.start();
@@ -152,6 +165,7 @@ public class RemoteClipboard implements ClipboardCommands {
 		}
 		try {
 			stopProcess();
+			SwtTestUtil.processEvents(100, null);
 		} catch (InterruptedException e) {
 			Thread.interrupted();
 		} finally {
@@ -164,6 +178,9 @@ public class RemoteClipboard implements ClipboardCommands {
 			if (remote != null) {
 				remote.stop();
 				remote = null;
+			}
+			if (registry != null) {
+				registry = null;
 			}
 		} finally {
 			if (remoteClipboardProcess != null) {

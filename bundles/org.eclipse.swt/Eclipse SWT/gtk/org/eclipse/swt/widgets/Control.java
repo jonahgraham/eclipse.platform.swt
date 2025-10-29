@@ -4826,8 +4826,8 @@ void releaseWidget () {
 void destroyWidget() {
 	if (GTK.GTK4) {
 		// Remove widget from hierarchy  by removing it from parent container
+		long currHandle = topHandle();
 		if (parent != null) {
-			long currHandle = topHandle();
 
 			if (GTK.GTK_IS_WINDOW(currHandle)) {
 				GTK4.gtk_window_destroy(currHandle);
@@ -4836,7 +4836,14 @@ void destroyWidget() {
 					OS.swt_fixed_remove(parent.parentingHandle(), fixedHandle);
 				}
 			}
+		} else {
+			if (GTK.GTK_IS_WINDOW(currHandle)) {
+				GTK4.gtk_window_destroy(currHandle);
+			} else {
+				// TODO is this unreachable?
+			}
 		}
+
 		releaseHandle();
 	} else {
 		super.destroyWidget();

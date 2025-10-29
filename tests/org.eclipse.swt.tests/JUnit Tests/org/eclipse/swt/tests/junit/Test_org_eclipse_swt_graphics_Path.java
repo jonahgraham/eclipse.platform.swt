@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.PathData;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.Path
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_graphics_Path {
 
 	private Display display;

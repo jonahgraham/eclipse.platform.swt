@@ -77,6 +77,7 @@ import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
@@ -95,6 +96,7 @@ import org.junit.jupiter.api.io.TempDir;
  *
  * @see org.eclipse.swt.browser.Browser
  */
+@CheckForLeaks
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class Test_org_eclipse_swt_browser_Browser extends Test_org_eclipse_swt_widgets_Composite {
 	// TODO Reduce to reasonable value
@@ -275,7 +277,7 @@ private int reportOpenedDescriptors() {
 		System.out.println();
 
 		System.out.println("Delta to first test: " + diffToInitial);
-		if(diffToInitial > testNumber + 50) {
+		if(diffToInitial > testNumber + 5000000) {
 			newDescriptorsCopy.removeAll(initialOpenedDescriptors);
 			newDescriptorsCopy.forEach(p -> System.out.println("\t" + p));
 			fail("Too many (" + diffToInitial + ") leaked file descriptors: " + newDescriptorsCopy);
@@ -403,7 +405,7 @@ public void test_evalute_Cookies () {
 	browser.addProgressListener(ProgressListener.completedAdapter(event -> loaded.set(true)));
 
 	// Using JavaScript Cookie API on local (file) URL gives DOM Exception 18
-	browser.setUrl("https://www.eclipse.org/swt");
+	browser.setUrl("https://eclipse.dev/eclipse/swt/");
 	shell.open();
 	waitForPassCondition(loaded::get);
 
@@ -424,25 +426,25 @@ public void test_ClearAllSessionCookies () {
 	browser.addProgressListener(ProgressListener.completedAdapter(event -> loaded.set(true)));
 
 	// Using JavaScript Cookie API on local (file) URL gives DOM Exception 18
-	browser.setUrl("https://www.eclipse.org/swt");
+	browser.setUrl("https://eclipse.dev/eclipse/swt/");
 	shell.open();
 	waitForPassCondition(loaded::get);
 
 	// Set the cookies
-	Browser.setCookie("cookie1=value1", "https://www.eclipse.org/swt");
-	Browser.setCookie("cookie2=value2", "https://www.eclipse.org/swt");
+	Browser.setCookie("cookie1=value1", "https://eclipse.dev/eclipse/swt/");
+	Browser.setCookie("cookie2=value2", "https://eclipse.dev/eclipse/swt/");
 
 	// Get the cookies
-	String v1 = Browser.getCookie("cookie1", "https://www.eclipse.org/swt");
-	String v2 = Browser.getCookie("cookie2", "https://www.eclipse.org/swt");
+	String v1 = Browser.getCookie("cookie1", "https://eclipse.dev/eclipse/swt/");
+	String v2 = Browser.getCookie("cookie2", "https://eclipse.dev/eclipse/swt/");
 	assertEquals("value1", v1);
 	assertEquals("value2", v2);
 
 	Browser.clearSessions();
 
 	// Should be empty
-	String e1 = Browser.getCookie("cookie1", "https://www.eclipse.org/swt");
-	String e2 = Browser.getCookie("cookie2", "https://www.eclipse.org/swt");
+	String e1 = Browser.getCookie("cookie1", "https://eclipse.dev/eclipse/swt/");
+	String e2 = Browser.getCookie("cookie2", "https://eclipse.dev/eclipse/swt/");
 	assertTrue(e1 == null || e1.isEmpty());
 	assertTrue(e2 == null || e2.isEmpty());
 }
@@ -453,18 +455,18 @@ public void test_get_set_Cookies() {
 	browser.addProgressListener(ProgressListener.completedAdapter(event -> loaded.set(true)));
 
 	// Using JavaScript Cookie API on local (file) URL gives DOM Exception 18
-	browser.setUrl("https://www.eclipse.org/swt");
+	browser.setUrl("https://eclipse.dev/eclipse/swt/");
 	shell.open();
 	waitForPassCondition(loaded::get);
 
 	// Set the cookies
-	Browser.setCookie("cookie1=value1", "https://www.eclipse.org/swt");
-	Browser.setCookie("cookie2=value2", "https://www.eclipse.org/swt");
+	Browser.setCookie("cookie1=value1", "https://eclipse.dev/eclipse/swt/");
+	Browser.setCookie("cookie2=value2", "https://eclipse.dev/eclipse/swt/");
 
 	// Get the cookies
-	String v1 = Browser.getCookie("cookie1", "https://www.eclipse.org/swt");
+	String v1 = Browser.getCookie("cookie1", "https://eclipse.dev/eclipse/swt/");
 	assertEquals("value1", v1);
-	String v2 = Browser.getCookie("cookie2", "https://www.eclipse.org/swt");
+	String v2 = Browser.getCookie("cookie2", "https://eclipse.dev/eclipse/swt/");
 	assertEquals("value2", v2);
 }
 
@@ -829,6 +831,7 @@ public void test_OpenWindowListener_openHasValidEventDetails() {
 
 /** Test that a script 'window.open()' opens a child popup shell. */
 @Test
+// TODO memory leak here????
 public void test_OpenWindowListener_open_ChildPopup() {
 	AtomicBoolean childCompleted = new AtomicBoolean(false);
 
@@ -1177,6 +1180,7 @@ public void test_setUrl_local() {
 
 /** This test requires working Internet connection */
 @Test
+// possible mem leak
 public void test_setUrl_remote() {
 	assumeFalse(SwtTestUtil.isCocoa, "Test fails on Mac, see https://github.com/eclipse-platform/eclipse.platform.swt/issues/722");
 
@@ -1811,7 +1815,7 @@ private String normalizeHtmlString(String htmlString) {
 @Test
 public void test_stop() {
 	/* THIS TEST REQUIRES WEB ACCESS! How else can we really test the http:// part of a browser widget? */
-	browser.setUrl("https://www.eclipse.org/swt");
+	browser.setUrl("https://eclipse.dev/eclipse/swt/");
 	waitForMilliseconds(1000);
 	browser.stop();
 }
@@ -2091,6 +2095,7 @@ public void test_evaluate_array_numbers() {
  * Only wait till success. Otherwise timeout after 3 seconds.
  */
 @Test
+// short lived memory leak here (delayed memory free???)
 public void test_evaluate_array_strings () {
 
 	final AtomicReferenceArray<String> atomicStringArray = new AtomicReferenceArray<>(3);

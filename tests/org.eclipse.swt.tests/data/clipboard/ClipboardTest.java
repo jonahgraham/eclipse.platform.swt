@@ -19,9 +19,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 
 import javax.swing.JButton;
@@ -55,7 +58,7 @@ public class ClipboardTest extends JFrame {
 		}
 	}
 
-	private static Registry rmiRegistry;
+	/* package */ static Registry rmiRegistry;
 	private JTextArea textArea;
 	private ClipboardCommandsImpl commands;
 
@@ -64,7 +67,6 @@ public class ClipboardTest extends JFrame {
 		registerSelectionTypes();
 		commands = new ClipboardCommandsImpl(this);
 		rmiRegistry.rebind(ClipboardCommands.ID, commands);
-
 		JLabel label = new JLabel("""
 				<html>This window is a AWT/Swing window used to test the SWT Clipboard<br>
 				This window will be opened and closed repeatedly while running<br>
@@ -162,5 +164,25 @@ public class ClipboardTest extends JFrame {
 		HtmlSelection.register();
 		UrlSelection.register();
 		MyTypeSelection.register();
+	}
+
+	public void stop() {
+		try {
+			rmiRegistry.unbind(ClipboardCommands.ID);
+			UnicastRemoteObject.unexportObject(commands, true);
+			commands = null;
+			UnicastRemoteObject.unexportObject(rmiRegistry, true);
+			rmiRegistry = null;
+			System.gc();
+			System.runFinalization();
+		} catch (RemoteException | NotBoundException e) {
+			// ignored, we wanted to cleanup, but there is noone to tell we failed
+		}
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			Thread.interrupted();
+		}
+		System.exit(0);
 	}
 }

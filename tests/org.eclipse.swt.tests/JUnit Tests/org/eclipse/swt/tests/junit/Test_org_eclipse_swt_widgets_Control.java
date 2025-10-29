@@ -341,6 +341,7 @@ public void test_addMouseTrackListenerLorg_eclipse_swt_events_MouseTrackListener
 }
 
 @Test
+// TODO memory leak here?
 public void test_addMouseTrackListenerMouseEnterAdapterLorg_eclipse_swt_events_MouseTrackListener() {
 	MouseTrackListener listener = MouseTrackListener.mouseEnterAdapter(e -> eventOccurred = true);
 	control.addMouseTrackListener(listener);

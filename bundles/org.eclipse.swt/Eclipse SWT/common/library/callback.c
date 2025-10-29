@@ -1641,6 +1641,8 @@ JNIEXPORT void JNICALL CALLBACK_NATIVE(unbind)
 	int i;
 	for (i=0; i<MAX_CALLBACKS; i++) {
 		if (callbackData[i].callback != NULL && (*env)->IsSameObject(env, callback, callbackData[i].callback)) {
+			fprintf(stderr, "SWT-JNI: Unbinding callback[%02d]\n", i);
+			fflush(stderr);
 			if (callbackData[i].callback != NULL) (*env)->DeleteGlobalRef(env, callbackData[i].callback);
 			if (callbackData[i].object != NULL) (*env)->DeleteGlobalRef(env, callbackData[i].object);
 			memset(&callbackData[i], 0, sizeof(CALLBACK_DATA));
@@ -1863,14 +1865,31 @@ jlong callback(int index, ...)
 				}
 
 				if (!isPrinted && (i == callbackData[index].arg_GdkEvent)) {
-					const GdkEventAny* event = (const GdkEventAny*)arg;
+					#ifdef GTK3
+						const GdkEventAny* event = (const GdkEventAny*)arg;
+						fprintf(stderr,
+							"%p [GdkEvent type=%d window=%p [%s]] ",
+							event,
+							event->type,
+							event->window,
+							glibTypeNameFromInstance(event->window)
+						);
+					#elif defined(GTK4)
+					GdkEvent* event = (GdkEvent*)arg;
 					fprintf(stderr,
-						"%p [GdkEvent type=%d window=%p [%s]] ",
+						"%p [GdkEvent type=%d device=%p [%s] display=%p [%s] surface=%p [%s]] ",
 						event,
-						event->type,
-						event->window,
-						glibTypeNameFromInstance(event->window)
+						gdk_event_get_event_type(event),
+						gdk_event_get_device(event),
+						glibTypeNameFromInstance(gdk_event_get_device(event)),
+						gdk_event_get_display(event),
+						glibTypeNameFromInstance(gdk_event_get_display(event)),
+						gdk_event_get_surface(event),
+						glibTypeNameFromInstance(gdk_event_get_surface(event))
 					);
+					#else
+					#error GTK3 or GTK4 missing
+					#endif
 
 					isPrinted = 1;
 				}

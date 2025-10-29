@@ -16,6 +16,7 @@ package org.eclipse.swt.tests.junit;
 
 
 import org.eclipse.swt.graphics.DeviceData;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.DeviceData
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_graphics_DeviceData {
 
 @Test

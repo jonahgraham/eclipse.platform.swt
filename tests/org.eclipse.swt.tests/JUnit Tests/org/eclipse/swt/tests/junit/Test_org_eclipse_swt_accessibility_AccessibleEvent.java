@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.eclipse.swt.accessibility.AccessibleEvent;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.accessibility.AccessibleEvent
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_accessibility_AccessibleEvent {
 
 @BeforeEach

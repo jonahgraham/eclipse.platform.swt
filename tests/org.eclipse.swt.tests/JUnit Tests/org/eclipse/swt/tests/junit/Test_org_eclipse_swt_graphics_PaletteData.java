@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.PaletteData
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_graphics_PaletteData {
 
 @Test

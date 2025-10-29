@@ -49,6 +49,7 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.DPIUtil;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,6 +62,7 @@ import org.junit.jupiter.api.io.TempDir;
  * @see org.eclipse.swt.graphics.Image
  */
 @SuppressWarnings("restriction")
+@CheckForLeaks
 public class Test_org_eclipse_swt_graphics_Image {
 
 	@TempDir

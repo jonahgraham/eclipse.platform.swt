@@ -13,24 +13,24 @@
  *******************************************************************************/
 package org.eclipse.swt.snippets;
 
-/*
- * example snippet: Hello World
- *
- * For a list of all SWT example snippets see
- * http://www.eclipse.org/swt/snippets/
- */
+import org.eclipse.swt.internal.gtk.*;
 import org.eclipse.swt.widgets.*;
 
 public class Snippet1 {
 
-public static void main (String [] args) {
-	Display display = new Display ();
-	Shell shell = new Shell(display);
-	shell.setText("Snippet 1");
-	shell.open ();
-	while (!shell.isDisposed ()) {
-		if (!display.readAndDispatch ()) display.sleep ();
+
+	public static void main(String[] args) {
+		System.out.println("GTK4: " + GTK.GTK4);
+		int i = 0;
+		final Display display = new Display();
+		while (i++ < 2500000) {
+			System.out.println(i);
+			Shell shell = new Shell(display);
+			shell.open(); // only needed on wayland
+			while (display.readAndDispatch()) {
+			}
+			shell.dispose();
+			System.gc();
+		}
 	}
-	display.dispose ();
-}
 }

@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.FontMetrics
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_graphics_FontMetrics {
 
 @BeforeEach

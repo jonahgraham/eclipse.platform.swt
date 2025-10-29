@@ -26,6 +26,7 @@ import java.util.Set;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.custom.StyleRange
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_custom_StyleRange {
 	final static Color RED = new Color(255,0,0);
 	final static Color BLUE = new Color(0,0,255);

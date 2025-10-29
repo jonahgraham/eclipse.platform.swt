@@ -26,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,6 +39,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -45,6 +48,7 @@ import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Synchronizer;
 import org.eclipse.test.Screenshots;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -55,6 +59,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
  *
  * @see org.eclipse.swt.widgets.Display
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_widgets_Display {
 
 private static boolean isRunningOnEclipseOrgHudson =
@@ -163,6 +168,8 @@ public void test_asyncExecLjava_lang_Runnable() {
 @Test
 public void test_Executor() throws InterruptedException {
 	final Display display = new Display();
+	Thread thread = null;
+	ExecutorService executor = Executors.newFixedThreadPool(1);
 	try {
 		AtomicInteger integer = new AtomicInteger();
 		display.execute(() -> {
@@ -171,7 +178,7 @@ public void test_Executor() throws InterruptedException {
 		});
 		assertEquals(1, integer.get());
 		CountDownLatch latch = new CountDownLatch(1);
-		new Thread(() -> {
+		thread = new Thread(() -> {
 			display.execute(() -> {
 				try {
 					assertEquals(display, Display.getCurrent());
@@ -180,7 +187,8 @@ public void test_Executor() throws InterruptedException {
 					latch.countDown();
 				}
 			});
-		}).start();
+		});
+		thread.start();
 		while(!latch.await(10, TimeUnit.MILLISECONDS)) {
 			while(display.readAndDispatch ()) {
 				//dispatch
@@ -190,7 +198,7 @@ public void test_Executor() throws InterruptedException {
 		CompletableFuture<Void> future = CompletableFuture.supplyAsync(()->{
 			assertNull(Display.getCurrent());
 			return "Hello SWT from background thread";
-		}).thenRunAsync(()->{
+		}, executor).thenRunAsync(()->{
 			assertEquals(display, Display.getCurrent());
 		}, Display.getDefault());
 		while(!future.isDone()) {
@@ -202,6 +210,9 @@ public void test_Executor() throws InterruptedException {
 		assertFalse(future.isCompletedExceptionally());
 	} finally {
 		display.dispose();
+		executor.shutdown();
+		assertTrue(executor.awaitTermination(1, TimeUnit.SECONDS));
+		assertFalse(thread.isAlive());
 	}
 }
 
@@ -337,6 +348,7 @@ public void test_getCursorControl() {
 	}
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_getCursorLocation() {
 	Display display = new Display();
@@ -1235,6 +1247,7 @@ public void test_setAppNameLjava_lang_String() {
 	Display.setAppName("My Application Name");
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_setCursorLocationII(TestInfo info) {
 	Display display = new Display();
@@ -1261,6 +1274,7 @@ public void test_setCursorLocationII(TestInfo info) {
 	}
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_setCursorLocationLorg_eclipse_swt_graphics_Point(TestInfo info) {
 	Display display = new Display();

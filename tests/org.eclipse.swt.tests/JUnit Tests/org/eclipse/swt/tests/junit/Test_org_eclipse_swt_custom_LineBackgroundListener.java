@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.LineBackgroundListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.custom.LineBackgroundListener
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_custom_LineBackgroundListener {
 	Shell shell;
 	StyledText styledText;

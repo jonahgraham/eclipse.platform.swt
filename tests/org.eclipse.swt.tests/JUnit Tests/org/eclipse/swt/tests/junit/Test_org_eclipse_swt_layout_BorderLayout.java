@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.BorderData;
 import org.eclipse.swt.layout.BorderLayout;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Automated Test Suite for class {@link BorderLayout}
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_layout_BorderLayout {
 	Display display;
 

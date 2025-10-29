@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.SWTException
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_SWTException {
 
 @Test

@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.swt.printing.PrinterData;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.printing.PrinterData
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_printing_PrinterData {
 
 @Test

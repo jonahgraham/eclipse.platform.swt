@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.eclipse.swt.graphics.RGBA;
+import org.eclipse.swt.tests.CheckForLeaks;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
  *
  * @see org.eclipse.swt.graphics.RGBA
  */
+@CheckForLeaks
 public class Test_org_eclipse_swt_graphics_RGBA {
 
 	@Test
