@@ -14,6 +14,8 @@
  *******************************************************************************/
 package org.eclipse.swt.tests.junit;
 
+import static org.eclipse.swt.tests.junit.SwtTestUtil.JENKINS_DETECT_ENV_VAR;
+import static org.eclipse.swt.tests.junit.SwtTestUtil.JENKINS_DETECT_REGEX;
 import static org.eclipse.swt.tests.junit.SwtTestUtil.assertSWTProblem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -45,10 +47,11 @@ import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Synchronizer;
 import org.eclipse.test.Screenshots;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 /**
  * Automated Test Suite for class org.eclipse.swt.widgets.Display
@@ -337,6 +340,7 @@ public void test_getCursorControl() {
 	}
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_getCursorLocation() {
 	Display display = new Display();
@@ -1065,7 +1069,9 @@ public void test_mapLorg_eclipse_swt_widgets_ControlLorg_eclipse_swt_widgets_Con
 }
 
 @Test
-@EnabledIfEnvironmentVariable(named = "GITHUB_ACTIONS", matches = "true", disabledReason = "Display.post tests only run successfully on GitHub actions - see https://github.com/eclipse-platform/eclipse.platform.swt/issues/2571")
+@Tag("gtk4-todo")
+@Tag("gtk3-wayland-todo")
+@DisabledIfEnvironmentVariable(named = JENKINS_DETECT_ENV_VAR, matches = JENKINS_DETECT_REGEX, disabledReason = "Display.post tests don't run reliably on Jenkins - see https://github.com/eclipse-platform/eclipse.platform.swt/issues/2571")
 public void test_postLorg_eclipse_swt_widgets_Event() {
 	final int KEYCODE = SWT.SHIFT;
 
@@ -1080,13 +1086,12 @@ public void test_postLorg_eclipse_swt_widgets_Event() {
 
 		Shell shell = new Shell(display, SWT.NO_TRIM);
 		shell.setBounds(display.getBounds());
-		shell.open();
 
 		// The display.post needs to successfully obtain the focused window (at least on GTK3)
-		// so we can send events to it. This processEvents gives SWT/GTK time to draw/focus/etc
+		// so we can send events to it. This openShell gives SWT/GTK time to draw/focus/etc
 		// the window so that org.eclipse.swt.widgets.Display.findFocusedWindow()
 		// returns non-zero
-		SwtTestUtil.processEvents();
+		SwtTestUtil.openShell(shell);
 
 		Event event;
 
@@ -1235,6 +1240,7 @@ public void test_setAppNameLjava_lang_String() {
 	Display.setAppName("My Application Name");
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_setCursorLocationII(TestInfo info) {
 	Display display = new Display();
@@ -1261,6 +1267,7 @@ public void test_setCursorLocationII(TestInfo info) {
 	}
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_setCursorLocationLorg_eclipse_swt_graphics_Point(TestInfo info) {
 	Display display = new Display();
@@ -1370,6 +1377,13 @@ public void test_setSynchronizerLorg_eclipse_swt_widgets_Synchronizer() {
 	}
 }
 
+/*
+ * this test false passes on GTK4 when not run in isolation. The test probably
+ * needs some work to ensure it is a valid test, such as making sure that it is
+ * the display.wake that wakes the first display.sleep call. Also checking the
+ * first call to display.sleep does return true.
+ */
+@Tag("gtk4-todo")
 @Test
 public void test_sleep() {
 	final Display display = new Display();
