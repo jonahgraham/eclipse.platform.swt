@@ -14,6 +14,8 @@
 package org.eclipse.swt.tests.junit;
 
 
+import static org.eclipse.swt.tests.junit.SwtTestUtil.JENKINS_DETECT_ENV_VAR;
+import static org.eclipse.swt.tests.junit.SwtTestUtil.JENKINS_DETECT_REGEX;
 import static org.eclipse.swt.tests.junit.SwtTestUtil.hasPixel;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -80,6 +81,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 /**
  * Automated Test Suite for class org.eclipse.swt.custom.StyledText
@@ -1166,6 +1168,7 @@ public void test_getLineHeight() {
 	assertTrue(text.getLineHeight() > 0);
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_getLineIndex () {
 	test_getLineIndex(text);
@@ -1252,6 +1255,7 @@ void test_getLineIndex (StyledText text) {
 	assertEquals(0, text.getLineIndex(100));
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_getLinePixel () {
 	test_getLinePixel(text);
@@ -5394,6 +5398,7 @@ public void test_insertInBlockSelection() {
 			+ System.lineSeparator()));
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_setStyleRanges_render() throws InterruptedException {
 	assumeFalse(SwtTestUtil.isCocoa, "Bug 553090 prevents test to work on Mac");
@@ -5424,6 +5429,7 @@ public void test_setStyleRanges_render() throws InterruptedException {
 /**
  * Test LineStyleListener which provides styles but no ranges.
  */
+@Tag("gtk4-todo")
 @Test
 public void test_lineStyleListener_styles_render() throws InterruptedException {
 	assumeFalse(SwtTestUtil.isCocoa, "Bug 536588 prevents test to work on Mac");
@@ -5449,6 +5455,7 @@ public void test_lineStyleListener_styles_render() throws InterruptedException {
 /**
  * Test LineStyleListener which provides styles and ranges.
  */
+@Tag("gtk4-todo")
 @Test
 public void test_lineStyleListener_stylesAndRanges_render() throws InterruptedException {
 	assumeFalse(SwtTestUtil.isCocoa, "Bug 536588 prevents test to work on Mac");
@@ -5475,6 +5482,7 @@ public void test_lineStyleListener_stylesAndRanges_render() throws InterruptedEx
 /**
  * Test LineStyleListener which provides invalid styles with invalid start or length.
  */
+@Tag("gtk4-todo")
 @Test
 public void test_lineStyleListener_invalidStyles_render() throws InterruptedException {
 	assumeFalse(SwtTestUtil.isCocoa, "Bug 536588 prevents test to work on Mac");
@@ -5658,6 +5666,7 @@ public void test_consistency_DragDetect () {
  * Such a problem was once caused with bug 547532 and discovered along bug 549110.
  * </p>
  */
+@Tag("gtk4-todo")
 @Test
 public void test_GlyphMetricsOnTab_Bug549110() throws InterruptedException {
 	assumeFalse(SwtTestUtil.isCocoa, "Bug 536588 prevents test to work on Mac");
@@ -5732,6 +5741,7 @@ public void test_InsertWhenDisabled() {
  * Bug 551335 - [StyledText] setStyleRanges reset less cache than necessary
  * Bug 551336 - [StyledText] resetting styles does not reset rendering
  */
+@Tag("gtk4-todo")
 @Test
 public void test_bug551335_lostStyles() throws InterruptedException {
 	assumeFalse(SwtTestUtil.isCocoa, "Bug 536588 prevents test to work on Mac");
@@ -5904,9 +5914,9 @@ public void test_arrowDownKeepsPositionAfterNewLine() {
  * Bug 565164 - SWT.BS event no longer working
  */
 @Test
+@Tag("gtk4-todo")
+@DisabledIfEnvironmentVariable(named = JENKINS_DETECT_ENV_VAR, matches = JENKINS_DETECT_REGEX, disabledReason = "Display.post tests don't run reliably on Jenkins - see https://github.com/eclipse-platform/eclipse.platform.swt/issues/2571")
 public void test_backspaceAndDelete() throws InterruptedException {
-	assumeTrue(Boolean.parseBoolean(System.getenv("GITHUB_ACTIONS")),
-			"Display.post tests only run successfully on GitHub actions - see https://github.com/eclipse-platform/eclipse.platform.swt/issues/2571");
 	shell.open();
 	text.setSize(10, 50);
 	// The display.post needs to successfully obtain the focused window (at least on GTK3)

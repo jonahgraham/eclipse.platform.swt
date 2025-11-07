@@ -1,5 +1,11 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+# This is the main build for SWT.
+# You can run this locally to test changes with the act command https://nektosact.com/
+# For example, to run all GTK4 tests:
+#   act --matrix java:21 --matrix gtk:gtk4 --matrix compositor:wayland --artifact-server-path $PWD/.artifacts
+# You may need to download runners on first run, act will ask but if you
+# want the big runner there is no progress as it downloads, so you can pull it with
+# docker directly:
+#   docker pull catthehacker/ubuntu:full-latest
 
 name: SWT Matrix Build
 concurrency: 
@@ -13,9 +19,6 @@ on:
     branches: [ master ]
     types: [opened, reopened, synchronize, labeled]
 
-env:
-  SWT_GTK4: "${{ contains(github.event.pull_request.labels.*.name, 'gtk4') && '1' || '0' }}"
-
 jobs:
   event_file:
     name: "Event File"
@@ -26,76 +29,127 @@ jobs:
       with:
         name: Event File
         path: ${{ github.event_path }}
-  build:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      # Lint warnings are expected in this block
+      # https://github.com/dorny/paths-filter/issues/223#issuecomment-2463309889
+      win32: ${{ steps.filter.outputs.win32  || 'false' }}
+      gtk:   ${{ steps.filter.outputs.gtk    || 'false' }}
+      cocoa: ${{ steps.filter.outputs.cocoa  || 'false' }}
+      md:    ${{ steps.filter.outputs.md     || 'false' }}
+      other: ${{ steps.filter.outputs.other  || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # so base/ref SHAs are diffable
+      - name: Paths filter (PR/Push only)
+        if: github.event.pull_request.base
+        # dorney/paths-filter is out of date, so use this fork with
+        # a specific fix
+        # https://github.com/dorny/paths-filter/pull/226#issuecomment-2805358761
+        uses: petermetz/paths-filter@5ee2f5d4cf5d7bdd998a314a42da307e2ae1639d
+        id: filter
+        with:
+          predicate-quantifier: 'every'
+          filters: |
+            win32:
+              - '**/win32/**'
+            gtk:
+              - '**/gtk/**'
+            cocoa:
+              - '**/cocoa/**'
+            md:
+              - '**/*.md'
+            # "other" = anything not matching the above buckets
+            other:
+              - '**'
+              - '!**/win32/**'
+              - '!**/gtk/**'
+              - '!**/cocoa/**'
+              - '!**/*.md'
+
+  build-linux:
+    name: Build (Linux)
+    needs: changes
+    # push => always; PR => run if gtk changed OR "other" changed (run-everything case)
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.gtk == 'true' || needs.changes.outputs.other == 'true' }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        java: [ '21' ]
-        config: 
-          - { name: Linux, os: ubuntu-latest, native: gtk.linux.x86_64 }
-          - { name: Windows, os: windows-latest, native: win32.win32.x86_64 }
-          - { name: MacOS x86, os: macos-15-intel, native: cocoa.macosx.x86_64 }
-          - { name: MacOS ARM, os: macos-latest, native: cocoa.macosx.aarch64 }
-    name: Verify ${{ matrix.config.name }} with Java-${{ matrix.java }}
-    runs-on: ${{ matrix.config.os }}
+        java: ['21']
+        gtk: [gtk3, gtk4]
+        compositor: [x11, xwayland, wayland]
+        exclude:
+          # run gtk3 on x11 only and gtk4 on wayland only
+          - gtk: gtk3
+            compositor: wayland
+          - gtk: gtk4
+            compositor: x11
+          - compositor: xwayland # xwayland doesn't seem to add much over x11 on xvfb
     steps:
-    - name: checkout swt
-      uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
-      with:
-       fetch-depth: 0 # required for jgit timestamp provider to work
-       lfs: false # lfs-pull is not necessary, the natives are re-build in each run
-    - name: Install Linux requirements
-      if: ${{ matrix.config.native == 'gtk.linux.x86_64'}}
-      run: |
-        sudo apt-get update -qq 
-        sudo apt-get install -qq -y libgtk-3-dev libgtk-4-dev freeglut3-dev webkit2gtk-driver
-    - name: Pull large static Windows binaries
-      if: ${{ matrix.config.native == 'win32.win32.x86_64'}}
-      run: |
-        git lfs pull --include='/binaries/org.eclipse.swt.win32.win32.x86_64/WebView2Loader.dll'
-    - name: Set up Java ${{ matrix.java }}
-      uses: actions/setup-java@de5a937a1dc73fbc1a67d7d1aa4bebc1082f3190 # v5.0.0
-      with:
-        java-version: ${{ matrix.java }}
-        distribution: 'temurin'
-        cache: maven
-    - name: Set up Maven
-      uses: stCarolas/setup-maven@v5
-      with:
-        maven-version: 3.9.11
-    - name: Build
-      env:
-        GTK_XCFLAGS: '-Wno-deprecated-declarations'
-      run: >-
-        ${{ contains(matrix.config.native, 'linux') && 'xvfb-run' || '' }}
-        mvn --batch-mode -V -U -e
-        --threads 1C
-        -DforkCount=1
-        '-Dnative=${{ matrix.config.native }}'
-        -Papi-check -Pjavadoc
-        '-Dtycho.baseline.replace=none'
-        --fail-at-end
-        -DskipNativeTests=false
-        -DfailIfNoTests=false
-        clean install
-    - name: Performance tests
-      if: contains(github.event.pull_request.labels.*.name, 'performance')
-      working-directory: tests/org.eclipse.swt.tests
-      run: >-
-        ${{ contains(matrix.config.native, 'linux') && 'xvfb-run' || '' }}
-        mvn --batch-mode -V -U -e
-        -DforkCount=1
-        --fail-at-end
-        -DskipNativeTests=true
-        -DfailIfNoTests=true
-        -Dtest=PerformanceTests
-        integration-test
-    - name: Upload Test Results for ${{ matrix.config.name }} / Java-${{ matrix.java }}
-      if: always()
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-      with:
-        name: test-results-${{ matrix.config.native }}-java${{ matrix.java }}
-        if-no-files-found: warn
-        path: |
-          ${{ github.workspace }}/**/target/surefire-reports/*.xml
-          ${{ github.workspace }}/**/hs_err_pid*.log
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Common SWT Build
+        uses: ./.github/actions/swt-build
+        with:
+          java: ${{ matrix.java }}
+          native: gtk.linux.x86_64
+          gtk: ${{ matrix.gtk }}
+          compositor: ${{ matrix.compositor }}
+          performance: ${{ contains(github.event.pull_request.labels.*.name, 'performance') && 'true' || 'false' }}
+          runtodotests: ${{ contains(github.event.pull_request.labels.*.name, 'runtodotests') && 'true' || 'false' }}
+
+  build-windows:
+    name: Build (Windows)
+    needs: changes
+    # push => always; PR => run if win32 changed OR "other" changed (run-everything case)
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.win32 == 'true' || needs.changes.outputs.other == 'true' }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['21']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Common SWT Build
+        uses: ./.github/actions/swt-build
+        with:
+          java: ${{ matrix.java }}
+          native: win32.win32.x86_64
+          performance: ${{ contains(github.event.pull_request.labels.*.name, 'performance') && 'true' || 'false' }}
+          runtodotests: ${{ contains(github.event.pull_request.labels.*.name, 'runtodotests') && 'true' || 'false' }}
+
+  build-macos:
+    name: Build (macOS)
+    needs: changes
+    # push => always; PR => run if cocoa changed OR "other" changed (run-everything case)
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.cocoa == 'true' || needs.changes.outputs.other == 'true' }}
+    runs-on:  ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['21']
+        native: [cocoa.macosx.x86_64, cocoa.macosx.aarch64]
+        runner: [macos-15-intel, macos-latest]
+        exclude:
+          - runner: macos-latest
+            native: cocoa.macosx.x86_64
+          - runner: macos-15-intel
+            native: cocoa.macosx.aarch64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Common SWT Build
+        uses: ./.github/actions/swt-build
+        with:
+          java: ${{ matrix.java }}
+          native: ${{ matrix.native }}
+          performance: ${{ contains(github.event.pull_request.labels.*.name, 'performance') && 'true' || 'false' }}
+          runtodotests: ${{ contains(github.event.pull_request.labels.*.name, 'runtodotests') && 'true' || 'false' }}
