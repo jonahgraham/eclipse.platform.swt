@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Synchronizer;
 import org.eclipse.test.Screenshots;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -337,6 +338,7 @@ public void test_getCursorControl() {
 	}
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_getCursorLocation() {
 	Display display = new Display();
@@ -1065,6 +1067,7 @@ public void test_mapLorg_eclipse_swt_widgets_ControlLorg_eclipse_swt_widgets_Con
 }
 
 @Test
+@Tag("gtk4-todo")
 @EnabledIfEnvironmentVariable(named = "GITHUB_ACTIONS", matches = "true", disabledReason = "Display.post tests only run successfully on GitHub actions - see https://github.com/eclipse-platform/eclipse.platform.swt/issues/2571")
 public void test_postLorg_eclipse_swt_widgets_Event() {
 	final int KEYCODE = SWT.SHIFT;
@@ -1235,6 +1238,7 @@ public void test_setAppNameLjava_lang_String() {
 	Display.setAppName("My Application Name");
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_setCursorLocationII(TestInfo info) {
 	Display display = new Display();
@@ -1261,6 +1265,7 @@ public void test_setCursorLocationII(TestInfo info) {
 	}
 }
 
+@Tag("gtk4-todo")
 @Test
 public void test_setCursorLocationLorg_eclipse_swt_graphics_Point(TestInfo info) {
 	Display display = new Display();
@@ -1370,6 +1375,13 @@ public void test_setSynchronizerLorg_eclipse_swt_widgets_Synchronizer() {
 	}
 }
 
+/*
+ * this test false passes on GTK4 when not run in isolation. The test probably
+ * needs some work to ensure it is a valid test, such as making sure that it is
+ * the display.wake that wakes the first display.sleep call. Also checking the
+ * first call to display.sleep does return true.
+ */
+@Tag("gtk4-todo")
 @Test
 public void test_sleep() {
 	final Display display = new Display();
