@@ -64,10 +64,11 @@ jobs:
               - '**/*.md'
             # "other" = anything not matching the above buckets
             other:
-              - '**/win32/**'
-              - '**/gtk/**'
-              - '**/cocoa/**'
-              - '**/*.md'
+              - '**'
+              - '!**/win32/**'
+              - '!**/gtk/**'
+              - '!**/cocoa/**'
+              - '!**/*.md'
 
   build-linux:
     name: Build (Linux)
