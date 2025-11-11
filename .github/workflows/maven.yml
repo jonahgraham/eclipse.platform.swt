@@ -41,7 +41,7 @@ jobs:
       md:    ${{ steps.filter.outputs.md     || 'false' }}
       other: ${{ steps.filter.outputs.other  || 'false' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           fetch-depth: 0  # so base/ref SHAs are diffable
       - name: Paths filter (PR/Push only)
