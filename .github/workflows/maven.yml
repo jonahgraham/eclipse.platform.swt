@@ -31,17 +31,14 @@ jobs:
       gtk:   ${{ steps.filter.outputs.gtk   || 'false' }}
       cocoa: ${{ steps.filter.outputs.cocoa || 'false' }}
       md:    ${{ steps.filter.outputs.md    || 'false' }}
-      other: ${{ (github.event_name == 'pull_request' || github.event_name == 'push') && (steps.filter.outputs.other || 'false') || 'true' }}
+      other: ${{ (github.event.pull_request.base || steps.filter.outputs.other) && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v4
       - name: Paths filter (PR/Push only)
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+        if: github.event.pull_request.base
         uses: dorny/paths-filter@v3
         id: filter
         with:
-          # Provide both ends of the diff explicitly to avoid the missing "base" error
-          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          ref:  ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           filters: |
             win32:
               - '**/win32/**'
