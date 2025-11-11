@@ -75,7 +75,6 @@ jobs:
     needs: changes
     # push => always; PR => run if gtk changed OR "other" changed (run-everything case)
     if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.gtk == 'true' || needs.changes.outputs.other == 'true' }}
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -89,48 +88,38 @@ jobs:
           - gtk: gtk4
             compositor: x11
           - compositor: xwayland # xwayland doesn't seem to add much over x11 on xvfb
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Common SWT Build
-        uses: ./.github/actions/swt-build
-        with:
-          java: ${{ matrix.java }}
-          native: gtk.linux.x86_64
-          gtk: ${{ matrix.gtk }}
-          compositor: ${{ matrix.compositor }}
-          performance: ${{ contains(github.event.pull_request.labels.*.name, 'performance') && 'true' || 'false' }}
-          runtodotests: ${{ contains(github.event.pull_request.labels.*.name, 'runtodotests') && 'true' || 'false' }}
+    uses: ./.github/workflows/build.yml
+    with:
+      runner: ubuntu-latest
+      java: ${{ matrix.java }}
+      native: gtk.linux.x86_64
+      gtk: ${{ matrix.gtk }}
+      compositor: ${{ matrix.compositor }}
+      performance: ${{ contains(github.event.pull_request.labels.*.name, 'performance') }}
+      runtodotests: ${{ contains(github.event.pull_request.labels.*.name, 'runtodotests') }}
 
   build-windows:
     name: Build (Windows)
     needs: changes
     # push => always; PR => run if win32 changed OR "other" changed (run-everything case)
     if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.win32 == 'true' || needs.changes.outputs.other == 'true' }}
-    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
         java: ['21']
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Common SWT Build
-        uses: ./.github/actions/swt-build
-        with:
-          java: ${{ matrix.java }}
-          native: win32.win32.x86_64
-          performance: ${{ contains(github.event.pull_request.labels.*.name, 'performance') && 'true' || 'false' }}
-          runtodotests: ${{ contains(github.event.pull_request.labels.*.name, 'runtodotests') && 'true' || 'false' }}
+    uses: ./.github/workflows/build.yml
+    with:
+      runner: windows-latest
+      java: ${{ matrix.java }}
+      native: win32.win32.x86_64
+      performance: ${{ contains(github.event.pull_request.labels.*.name, 'performance') }}
+      runtodotests: ${{ contains(github.event.pull_request.labels.*.name, 'runtodotests') }}
 
   build-macos:
     name: Build (macOS)
     needs: changes
     # push => always; PR => run if cocoa changed OR "other" changed (run-everything case)
     if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.cocoa == 'true' || needs.changes.outputs.other == 'true' }}
-    runs-on:  ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
@@ -142,14 +131,10 @@ jobs:
             native: cocoa.macosx.x86_64
           - runner: macos-15-intel
             native: cocoa.macosx.aarch64
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Common SWT Build
-        uses: ./.github/actions/swt-build
-        with:
-          java: ${{ matrix.java }}
-          native: ${{ matrix.native }}
-          performance: ${{ contains(github.event.pull_request.labels.*.name, 'performance') && 'true' || 'false' }}
-          runtodotests: ${{ contains(github.event.pull_request.labels.*.name, 'runtodotests') && 'true' || 'false' }}
+    uses: ./.github/workflows/build.yml
+    with:
+      runner: ${{ matrix.runner }}
+      java: ${{ matrix.java }}
+      native: ${{ matrix.native }}
+      performance: ${{ contains(github.event.pull_request.labels.*.name, 'performance') }}
+      runtodotests: ${{ contains(github.event.pull_request.labels.*.name, 'runtodotests') }}
