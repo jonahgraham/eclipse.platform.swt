@@ -52,6 +52,7 @@ runs:
 
     - name: Disable AppArmor when testing WebKit on GTK4
       if: runner.os == 'Linux' && inputs.gtk == 'gtk4'
+      shell: bash
       run: |
         # WebKit for GTK4 uses bwrap and on Ubuntu 24.04 default settings are not working
         # so turn off apparmor. We are already running in a protected environment, so we
@@ -61,6 +62,7 @@ runs:
 
     - name: Pull large static Windows binaries
       if: runner.os == 'Windows' 
+      shell: bash
       run: |
         git lfs pull --include='/binaries/org.eclipse.swt.win32.win32.x86_64/WebView2Loader.dll'
 
@@ -81,6 +83,7 @@ runs:
         GTK_XCFLAGS: '-Wno-deprecated-declarations'
         SWT_GTK4: "${{ inputs.gtk == 'gtk4' && '1' || '0' }}"
         GDK_BACKEND: "${{ inputs.compositor == 'wayland' && 'wayland' || 'x11' }}"
+      shell: bash
       run: >-
         ${{ inputs.compositor == 'x11' && 'xvfb-run' || '' }}
         ${{ inputs.compositor == 'wayland' && 'wlheadless-run --width 1920 --height 1080 -- ' || '' }}
@@ -105,6 +108,7 @@ runs:
         SWT_GTK4: "${{ inputs.gtk == 'gtk4' && '1' || '0' }}"
         GDK_BACKEND: "${{ inputs.compositor == 'wayland' && 'wayland' || 'x11' }}"
       working-directory: tests/org.eclipse.swt.tests
+      shell: bash
       run: >-
         ${{ inputs.compositor == 'x11' && 'xvfb-run' || '' }}
         ${{ inputs.compositor == 'wayland' && 'wlheadless-run --width 1920 --height 1080 -- ' || '' }}
