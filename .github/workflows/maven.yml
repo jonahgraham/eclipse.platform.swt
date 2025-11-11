@@ -42,7 +42,7 @@ jobs:
       other: ${{ (github.event.pull_request.base || steps.filter.outputs.other) && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v4
-      - name: Paths filter (PR/Push only)
+      - name: Paths filter (PR only)
         if: github.event.pull_request.base
         uses: dorny/paths-filter@v3
         id: filter
