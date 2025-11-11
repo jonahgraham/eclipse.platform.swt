@@ -46,11 +46,12 @@ jobs:
           fetch-depth: 0  # so base/ref SHAs are diffable
       - name: Paths filter (PR/Push only)
         if: github.event.pull_request.base
-        uses: dorny/paths-filter@v3
+        # dorney/paths-filter is out of date, so use this fork with
+        # a specific fix
+        # https://github.com/dorny/paths-filter/pull/226#issuecomment-2805358761
+        uses: petermetz/paths-filter@5ee2f5d4cf5d7bdd998a314a42da307e2ae1639d
         id: filter
         with:
-          # Lint error expected aboout predicate-quantifier
-          # https://github.com/dorny/paths-filter/pull/226
           predicate-quantifier: 'every'
           filters: |
             win32:
