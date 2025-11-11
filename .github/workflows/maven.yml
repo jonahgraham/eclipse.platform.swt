@@ -35,11 +35,11 @@ jobs:
     outputs:
       # Lint warnings are expected in this block
       # https://github.com/dorny/paths-filter/issues/223#issuecomment-2463309889
-      win32: ${{ steps.filter.outputs.win32 || 'false' }}
-      gtk:   ${{ steps.filter.outputs.gtk   || 'false' }}
-      cocoa: ${{ steps.filter.outputs.cocoa || 'false' }}
-      md:    ${{ steps.filter.outputs.md    || 'false' }}
-      other: ${{ (github.event.pull_request.base || steps.filter.outputs.other) && 'true' || 'false' }}
+      win32: ${{ steps.filter.outputs.win32  || 'false' }}
+      gtk:   ${{ steps.filter.outputs.gtk    || 'false' }}
+      cocoa: ${{ steps.filter.outputs.cocoa  || 'false' }}
+      md:    ${{ steps.filter.outputs.md     || 'false' }}
+      other: ${{ steps.filter.outputs.other  || 'false' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -96,7 +96,7 @@ jobs:
   build-windows:
     name: Build (Windows)
     needs: changes
-    # push => always; PR => run if gtk changed OR "other" changed (run-everything case)
+    # push => always; PR => run if win32 changed OR "other" changed (run-everything case)
     if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.win32 == 'true' || needs.changes.outputs.other == 'true' }}
     runs-on: windows-latest
     strategy:
@@ -116,7 +116,7 @@ jobs:
   build-macos:
     name: Build (macOS)
     needs: changes
-    # push => always; PR => run if gtk changed OR "other" changed (run-everything case)
+    # push => always; PR => run if cocoa changed OR "other" changed (run-everything case)
     if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.cocoa == 'true' || needs.changes.outputs.other == 'true' }}
     runs-on:  ${{ matrix.runner }}
     strategy:
