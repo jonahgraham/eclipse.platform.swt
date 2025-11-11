@@ -7,7 +7,7 @@
 # docker directly:
 #   docker pull catthehacker/ubuntu:full-latest
 
-name: SWT Matrix Build
+name: SWT Matrix Build test
 concurrency: 
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
