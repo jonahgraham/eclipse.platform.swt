@@ -42,11 +42,16 @@ jobs:
       other: ${{ (github.event.pull_request.base || steps.filter.outputs.other) && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # so base/ref SHAs are diffable
       - name: Paths filter (PR/Push only)
         if: github.event.pull_request.base
         uses: dorny/paths-filter@v3
         id: filter
         with:
+          # Lint error expected aboout predicate-quantifier
+          # https://github.com/dorny/paths-filter/pull/226
+          predicate-quantifier: 'every'
           filters: |
             win32:
               - '**/win32/**'
@@ -58,11 +63,10 @@ jobs:
               - '**/*.md'
             # "other" = anything not matching the above buckets
             other:
-              - '**'
-              - '!**/win32/**'
-              - '!**/gtk/**'
-              - '!**/cocoa/**'
-              - '!**/*.md'
+              - '**/win32/**'
+              - '**/gtk/**'
+              - '**/cocoa/**'
+              - '**/*.md'
 
   build-linux:
     name: Build (Linux)
