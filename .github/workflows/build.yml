@@ -50,6 +50,7 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         shell: bash
         run: |
+          set -x
           sudo apt-get update -qq
           # Required tools (GHA normally provides these in their base images)
           sudo apt-get install -qq -y build-essential git
@@ -101,7 +102,7 @@ jobs:
           ${{ inputs.compositor == 'wayland' && 'wlheadless-run --width 1920 --height 1080 -- ' || '' }}
           ${{ inputs.compositor == 'xwayland' && 'wlheadless-run --width 1920 --height 1080 -- xwayland-run -geometry 1920x1080  -- ' || '' }}
           mvn --batch-mode -V -U -e
-          --threads 1
+          --threads 1C
           -DforkCount=1
           '-Dnative=${{ inputs.native }}'
           -Papi-check -Pjavadoc
