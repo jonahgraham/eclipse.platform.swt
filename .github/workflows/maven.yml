@@ -69,6 +69,9 @@ jobs:
         gtk: [gtk3, gtk4]
         compositor: [x11, xwayland, wayland]
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Common SWT Build
         uses: ./.github/actions/swt-build
         with:

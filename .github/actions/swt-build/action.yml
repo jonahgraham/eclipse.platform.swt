@@ -25,9 +25,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Set up Java ${{ inputs.java }}
       uses: actions/setup-java@v4
       with:
@@ -117,15 +114,15 @@ runs:
         -Dtest=PerformanceTests
         integration-test
 
-    - name: Upload Test Results
-      if: always()
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-      with:
-        name: test-results-${{ input.native }}${{ inputs.gtk }}${{ inputs.compositor }}-java${{ inputs.java }}${{ inputs.performance == 'yes' ? '-performance' : ''}}
-        if-no-files-found: warn
-        path: |
-          ${{ github.workspace }}/**/target/surefire-reports/*.xml
-          ${{ github.workspace }}/**/hs_err_pid*.log
-          ${{ github.workspace }}/**/*.log
-          ${{ github.workspace }}/**/*.dump
-          ${{ github.workspace }}/**/*.dumpstream
+    # - name: Upload Test Results
+    #   if: always()
+    #   uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+    #   with:
+    #     name: test-results-${{ input.native }}${{ inputs.gtk }}${{ inputs.compositor }}-java${{ inputs.java }}${{ inputs.performance == 'yes' ? '-performance' : ''}}
+    #     if-no-files-found: warn
+    #     path: |
+    #       ${{ github.workspace }}/**/target/surefire-reports/*.xml
+    #       ${{ github.workspace }}/**/hs_err_pid*.log
+    #       ${{ github.workspace }}/**/*.log
+    #       ${{ github.workspace }}/**/*.dump
+    #       ${{ github.workspace }}/**/*.dumpstream
