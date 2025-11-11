@@ -1,5 +1,11 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+# This is the main build for SWT.
+# You can run this locally to test changes with the act command https://nektosact.com/
+# For example, to run all GTK4 tests:
+#   act --matrix java:21 --matrix gtk:gtk4 --matrix compositor:wayland --artifact-server-path $PWD/.artifacts
+# You may need to download runners on first run, act will ask but if you
+# want the big runner there is no progress as it downloads, so you can pull it with
+# docker directly:
+#   docker pull catthehacker/ubuntu:full-latest
 
 name: SWT Matrix Build
 concurrency: 
@@ -27,6 +33,8 @@ jobs:
     name: Detect changed paths
     runs-on: ubuntu-latest
     outputs:
+      # Lint warnings are expected in this block
+      # https://github.com/dorny/paths-filter/issues/223#issuecomment-2463309889
       win32: ${{ steps.filter.outputs.win32 || 'false' }}
       gtk:   ${{ steps.filter.outputs.gtk   || 'false' }}
       cocoa: ${{ steps.filter.outputs.cocoa || 'false' }}
@@ -79,3 +87,50 @@ jobs:
           native: gtk.linux.x86_64
           gtk: ${{ matrix.gtk }}
           compositor: ${{ matrix.compositor }}
+
+  build-windows:
+    name: Build (Windows)
+    needs: changes
+    # push => always; PR => run if gtk changed OR "other" changed (run-everything case)
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.win32 == 'true' || needs.changes.outputs.other == 'true' }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['21']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Common SWT Build
+        uses: ./.github/actions/swt-build
+        with:
+          java: ${{ matrix.java }}
+          native: win32.win32.x86_64
+
+  build-macos:
+    name: Build (macOS)
+    needs: changes
+    # push => always; PR => run if gtk changed OR "other" changed (run-everything case)
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.cocoa == 'true' || needs.changes.outputs.other == 'true' }}
+    runs-on:  ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['21']
+        native: [cocoa.macosx.x86_64, cocoa.macosx.aarch64]
+        runner: [macos-15-intel, macos-latest]
+        exclude:
+          - runner: macos-latest
+            native: cocoa.macosx.x86_64
+          - runner: macos-15-intel
+            native: cocoa.macosx.aarch64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Common SWT Build
+        uses: ./.github/actions/swt-build
+        with:
+          java: ${{ matrix.java }}
+          native: ${{ matrix.native }}
