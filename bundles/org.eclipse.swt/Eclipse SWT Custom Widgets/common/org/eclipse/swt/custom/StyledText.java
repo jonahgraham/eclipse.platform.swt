@@ -17,6 +17,7 @@
  *******************************************************************************/
 package org.eclipse.swt.custom;
 
+// fake edit common code
 
 import java.util.*;
 import java.util.stream.*;
