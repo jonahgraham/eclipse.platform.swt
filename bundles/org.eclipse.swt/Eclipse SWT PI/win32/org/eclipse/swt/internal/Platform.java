@@ -14,7 +14,7 @@
 package org.eclipse.swt.internal;
 
 import org.eclipse.swt.internal.win32.version.*;
-// fake edit
+// fake edit 2
 public class Platform {
 	public static final String PLATFORM = "win32"; //$NON-NLS-1$
 
