@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.swt.internal;
+// fake macos edit
 
 public class Platform {
 	public static final String PLATFORM = "cocoa"; //$NON-NLS-1$
