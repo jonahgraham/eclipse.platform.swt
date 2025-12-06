@@ -596,6 +596,9 @@ public Display () {
  */
 public Display (DeviceData data) {
 	super (data);
+	if (true) {
+		throw new RuntimeException("Fake test fails");
+	}
 }
 
 Control _getFocusControl () {
