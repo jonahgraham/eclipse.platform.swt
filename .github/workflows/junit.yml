@@ -26,18 +26,25 @@ jobs:
           artifacts_url=${{ github.event.workflow_run.artifacts_url || github.event.inputs.artifacts_url }}
           results=$(gh api "$artifacts_url" -q '.artifacts[] | [.name] | @tsv' | grep 'test-results-')
 
+          platforms=""
           if [[ "$results" == *macos* ]]; then
             platforms="macos"
           fi
           if [[ "$results" == *linux* ]]; then
-            platforms="${platforms} linux"
+            if [[ -n "$platforms" ]]; then
+              platforms+=" "
+            fi
+            platforms+="linux"
           fi
           if [[ "$results" == *win32* ]]; then
-            platforms="${platforms} win32"
+            if [[ -n "$platforms" ]]; then
+              platforms+=" "
+            fi
+            platforms+="win32"
           fi
 
           if [[ "$platforms" == "macos linux win32" ]]; then
-            platforms="${platforms} all"
+            platforms+=" all"
             echo "isall=1" >> "$GITHUB_OUTPUT"
           else
             echo "isall=0" >> "$GITHUB_OUTPUT"
