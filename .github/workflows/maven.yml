@@ -43,10 +43,7 @@ jobs:
       md:    ${{ steps.filter.outputs.md     || 'false' }}
       other: ${{ steps.filter.outputs.other  || 'false' }}
     steps:
-      - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
-        with:
-          fetch-depth: 0  # so base/ref SHAs are diffable
-      - name: Paths filter (PR/Push only)
+      - name: Paths filter (PRs only)
         if: github.event.pull_request.base
         # dorney/paths-filter is out of date, so use this fork with
         # a specific fix for missing predicate-quantifier in action's
