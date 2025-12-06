@@ -15,6 +15,7 @@ jobs:
     if: github.event.workflow_run.conclusion != 'skipped'
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
+      individual_comment: ${{ steps.build-matrix.outputs.individual_comment }}
     steps:
       - name: Find test-results from artifacts_url and build dynamic matrix
         id: build-matrix
@@ -34,6 +35,14 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
+          count=$(echo "$json" | jq '.result | length')
+          # If count == 6 that means all matrix entries ran, so in a PR report
+          # only the summary comment
+          if [ "$count" -eq 6 ]; then
+            echo "individual_comment=off" >> "$GITHUB_OUTPUT"
+          else
+            echo "individual_comment=always" >> "$GITHUB_OUTPUT"
+          fi
   per-results-job:
     needs: discover-results
     runs-on: ubuntu-latest
@@ -53,8 +62,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
-          echo "Now working on test results for: ${{ matrix.result }}"
-
           set -x
           mkdir -p artifacts && cd artifacts
 
@@ -72,6 +79,40 @@ jobs:
         id: test-results
         with:
           check_name: ${{ matrix.result }}
+          comment_mode: ${{ needs.discover-results.outputs.individual_comment }}
+          commit: ${{ github.event.workflow_run.head_sha }}
+          event_file: artifacts/Event File/event.json
+          event_name: ${{ github.event.workflow_run.event }}
+          files: "artifacts/**/*.xml"
+  all-results-job:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
+      issues: read
+      actions: read
+    steps:
+      - name: Downloading Test Results
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          set -x
+          mkdir -p artifacts && cd artifacts
+
+          artifacts_url=${{ github.event.workflow_run.artifacts_url || github.event.inputs.artifacts_url }}
+
+          gh api "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
+          do
+            IFS=$'\t' read name url <<< "$artifact"
+            gh api $url > "$name.zip"
+            unzip -d "$name" "$name.zip"
+          done
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
+        id: test-results
+        with:
           commit: ${{ github.event.workflow_run.head_sha }}
           event_file: artifacts/Event File/event.json
           event_name: ${{ github.event.workflow_run.event }}
